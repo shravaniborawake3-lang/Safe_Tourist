@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotels — SafeTrail Navi Mumbai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --navy: #0a0f1e;
+            --deep: #0d1528;
+            --card: #111827;
+            --accent: #00c9ff;
+            --gold: #f5a623;
+            --danger: #ff4757;
+            --safe: #2ed573;
+            --text: #e8edf5;
+            --muted: #7a8aa0;
+            --border: rgba(0, 201, 255, 0.15)
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--navy);
+            color: var(--text);
+            min-height: 100vh
+        }
+        
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            height: 62px;
+            background: rgba(10, 15, 30, .97);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100
+        }
+        
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 6px
+        }
+        
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: .84rem;
+            padding: 7px 13px;
+            border-radius: 7px;
+            transition: all .2s;
+            border: 1px solid transparent;
+            font-weight: 500
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+            border-color: var(--border);
+            background: rgba(255, 255, 255, .04)
+        }
+        
+        .nav-sos {
+            background: var(--danger)!important;
+            color: #fff!important;
+            font-weight: 700!important
+        }
+        
+        .ph {
+            padding: 36px 48px 20px
+        }
+        
+        .ph h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 6px
+        }
+        
+        .ph p {
+            color: var(--muted)
+        }
+        
+        .city-sec {
+            padding: 0 48px 28px
+        }
+        
+        .city-sec h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: .88rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            margin-bottom: 14px
+        }
+        
+        .city-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px
+        }
+        
+        .cb {
+            padding: 9px 18px;
+            border-radius: 22px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--muted);
+            font-size: .84rem;
+            cursor: pointer;
+            transition: all .2s;
+            font-family: 'DM Sans', sans-serif
+        }
+        
+        .cb:hover,
+        .cb.active {
+            border-color: var(--accent);
+            color: var(--text);
+            background: rgba(0, 201, 255, .09)
+        }
+        
+        .hotels-sec {
+            padding: 0 48px 60px
+        }
+        
+        .hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px
+        }
+        
+        .hdr-t {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.45rem;
+            font-weight: 700
+        }
+        
+        .hdr-t span {
+            color: var(--accent)
+        }
+        
+        .hdr-c {
+            color: var(--muted);
+            font-size: .84rem
+        }
+        
+        .hgrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 18px
+        }
+        
+        .hcard {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all .3s
+        }
+        
+        .hcard:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 14px 44px rgba(0, 201, 255, .1)
+        }
+        
+        .himg {
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0d1528, #1a3a6e)
+        }
+        
+        .himg-addr {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, .75));
+            padding: 10px 12px;
+            font-size: .76rem;
+            color: #fff;
+            font-weight: 600
+        }
+        
+        .hbody {
+            padding: 16px
+        }
+        
+        .hname {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 5px
+        }
+        
+        .hstars {
+            color: var(--gold);
+            font-size: .82rem;
+            margin-bottom: 10px
+        }
+        
+        .hmeta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px
+        }
+        
+        .htag {
+            font-size: .7rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: .3px
+        }
+        
+        .t-price {
+            background: rgba(245, 166, 35, .12);
+            color: var(--gold)
+        }
+        
+        .t-food {
+            background: rgba(46, 213, 115, .12);
+            color: var(--safe)
+        }
+        
+        .hinfo {
+            font-size: .8rem;
+            color: var(--muted);
+            line-height: 1.65;
+            margin-bottom: 12px
+        }
+        
+        .hactions {
+            display: flex;
+            gap: 8px
+        }
+        
+        .btn-map {
+            flex: 1;
+            padding: 9px;
+            background: var(--accent);
+            color: var(--navy);
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: .78rem;
+            cursor: pointer;
+            font-family: 'Syne', sans-serif;
+            transition: .2s
+        }
+        
+        .btn-map:hover {
+            opacity: .86
+        }
+        
+        .btn-call {
+            padding: 9px 12px;
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .78rem;
+            cursor: pointer;
+            transition: .2s
+        }
+        
+        .btn-call:hover {
+            border-color: var(--accent)
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="index.html" class="logo">🛡️ SafeTrail</a>
+        <div class="nav-links">
+            <a href="index.html">Home</a><a href="map.html">Live Map</a>
+            <a href="hotels.html" class="active">Hotels</a><a href="services.html">Services</a>
+            <a href="sos.html" class="nav-sos">🆘 SOS</a>
+        </div>
+    </nav>
+    <div class="ph">
+        <h1>🏨 Hotels in Navi Mumbai</h1>
+        <p>Select a city below to see hotels with prices, food & location</p>
+    </div>
+    <div class="city-sec">
+        <h2>Select City</h2>
+        <div class="city-grid" id="cityGrid"></div>
+    </div>
+    <div class="hotels-sec">
+        <div class="hdr">
+            <div class="hdr-t">Hotels in <span id="cityName">Vashi</span></div>
+            <div class="hdr-c" id="hotelCnt"></div>
+        </div>
+        <div class="hgrid" id="hotelGrid"></div>
+    </div>
+    <script>
+        const BASE_URL = 'http://127.0.0.1:5500';
+        let allCities = [];
+        let sel = 'Vashi';
+
+        // Static fallback data
+        const staticCities = ['Vashi', 'Nerul', 'Belapur', 'Kharghar', 'Panvel', 'Airoli', 'Ghansoli', 'Turbhe', 'Koparkhairane', 'Sanpada', 'Juinagar', 'Seawoods', 'Ulwe', 'Dronagiri', 'Taloja', 'Kamothe', 'Kalamboli', 'New Panvel', 'Roadpali', 'Khandeshwar', 'Nhava Sheva'];
+        const cities = staticCities;
+
+        const staticData = {
+            'Vashi': [{n:'Hotel Regency Vashi',s:4,r:'₹2,500–₹5,000/night',f:'Multi-cuisine · ₹150–₹600',ph:'+91-22-2765-0000',a:'Sector 17, Vashi',e:'🏨'},{n:'The Lalit Mumbai',s:5,r:'₹8,000–₹18,000/night',f:'Fine dining · ₹500–₹2,000',ph:'+91-22-6699-7777',a:'Near Vashi, NM',e:'🏰'},{n:'Hotel Suraj Vashi',s:3,r:'₹1,200–₹2,800/night',f:'Veg thali · ₹80–₹200',ph:'+91-22-2765-1234',a:'Sector 30A, Vashi',e:'🏩'},{n:'OYO Rooms Vashi',s:2,r:'₹700–₹1,500/night',f:'Local eateries · ₹50–₹150',ph:'+91-8080-258-258',a:'Near Vashi Station',e:'🛏️'}],
+            'Nerul': [{n:'Hotel Nerul Executive',s:3,r:'₹1,800–₹3,500/night',f:'South Indian & Chinese · ₹100–₹400',ph:'+91-22-2771-0000',a:'Sector 21, Nerul',e:'🏨'},{n:'Treebo Hotel Nerul',s:3,r:'₹1,500–₹3,000/night',f:'Buffet breakfast included',ph:'+91-9310-505-050',a:'Sector 6, Nerul East',e:'🏩'},{n:'Zostel Nerul',s:2,r:'₹450–₹900/night',f:'Self-cook kitchen',ph:'+91-9717-700-040',a:'Near Nerul Station',e:'🎒'}],
+            'Panvel': [{n:'Hotel Presidency Panvel',s:4,r:'₹3,000–₹6,500/night',f:'Mughlai & Continental · ₹200–₹800',ph:'+91-22-2740-0000',a:'NH-48, Old Panvel',e:'🏰'},{n:'Comfort Inn Panvel',s:3,r:'₹2,000–₹4,000/night',f:'Maharashtrian · ₹100–₹350',ph:'+91-22-2746-5555',a:'Near Panvel Bus Depot',e:'🏨'},{n:'OYO Townhouse Panvel',s:3,r:'₹1,200–₹2,500/night',f:'Room service available',ph:'+91-8080-258-258',a:'Sector 7, New Panvel',e:'🏩'}],
+            'Kharghar': [{n:'Hotel Hilton Kharghar',s:4,r:'₹4,000–₹9,000/night',f:'Rooftop multi-cuisine · ₹300–₹1,000',ph:'+91-22-2799-0000',a:'Sector 3, Kharghar',e:'🏰'},{n:'Hotel Sai Krupa',s:2,r:'₹900–₹1,800/night',f:'Veg thali · ₹70–₹180',ph:'+91-22-2774-1111',a:'Central Park Rd, Kharghar',e:'🏨'}],
+            'Belapur': [{n:'Ramada by Wyndham Belapur',s:5,r:'₹6,000–₹14,000/night',f:'Premium dining · ₹400–₹1,500',ph:'+91-22-6730-7000',a:'CBD Belapur Sector 11',e:'🏰'},{n:'Hotel Sagar Plaza',s:3,r:'₹2,000–₹4,500/night',f:'Seafood speciality · ₹200–₹600',ph:'+91-22-2757-2222',a:'Sector 15, CBD Belapur',e:'🏨'}],
+            'Seawoods': [{n:'Novotel Seawoods',s:5,r:'₹7,500–₹16,000/night',f:'International buffet · ₹450–₹1,800',ph:'+91-22-6152-6000',a:'Seawoods Grand Central Mall',e:'🏰'},{n:'Holiday Inn Seawoods',s:4,r:'₹4,500–₹9,000/night',f:'Pan-Asian & Indian · ₹300–₹900',ph:'+91-22-6666-7777',a:'Sector 40, Seawoods',e:'🏨'}],
+            'Airoli': [{n:'Airoli Business Hotel',s:3,r:'₹1,600–₹3,200/night',f:'Corp cafeteria · ₹120–₹300',ph:'+91-22-2769-4444',a:'TTC Industrial, Airoli',e:'🏨'}],
+            'Kamothe': [{n:'Hotel Saffron Kamothe',s:3,r:'₹1,500–₹3,000/night',f:'North Indian · ₹100–₹350',ph:'+91-22-2740-8888',a:'Sector 6, Kamothe',e:'🏨'}],
+            'Kalamboli': [{n:'Hotel Grand Kalamboli',s:3,r:'₹1,800–₹3,500/night',f:'Gujarati thali · ₹100–₹280',ph:'+91-22-2741-0000',a:'Near Kalamboli Circle',e:'🏨'}],
+            'Turbhe': [{n:'Hotel Park Turbhe',s:3,r:'₹1,400–₹2,800/night',f:'Konkani & Coastal · ₹150–₹400',ph:'+91-22-2768-5555',a:'MIDC Turbhe',e:'🏨'}],
+        };
+
+        const staticDef = c => [{n:`${c} Budget Inn`,s:2,r:'₹800–₹1,800/night',f:'Local eateries · ₹50–₹200',ph:'+91-22-2700-0000',a:`Near ${c} Station`,e:'🏩'},{n:`Hotel ${c} Plaza`,s:3,r:'₹2,000–₹4,000/night',f:'Veg & Non-veg · ₹100–₹350',ph:'+91-22-2700-1111',a:`Main Road, ${c}`,e:'🏨'}];
+
+        // Init: load cities from API, fall back to static
+        async function initCities() {
+            try {
+                const res = await fetch(`${BASE_URL}/api/cities`);
+                const data = await res.json();
+                allCities = data.cities || staticCities;
+            } catch (e) {
+                allCities = staticCities;
+            }
+            const p = new URLSearchParams(location.search);
+            if (p.get('city') && allCities.includes(p.get('city'))) sel = p.get('city');
+            renderCities();
+            renderHotels(sel);
+        }
+
+        function renderCities() {
+            const g = document.getElementById('cityGrid');
+            g.innerHTML = '';
+            allCities.forEach(c => {
+                const b = document.createElement('button');
+                b.className = 'cb' + (c === sel ? ' active' : '');
+                b.textContent = c;
+                b.onclick = () => pick(c);
+                g.appendChild(b);
+            });
+        }
+
+        function pick(c) {
+            sel = c;
+            document.querySelectorAll('.cb').forEach(b => b.classList.toggle('active', b.textContent === c));
+            renderHotels(c);
+        }
+
+        async function renderHotels(c) {
+            const g = document.getElementById('hotelGrid');
+            document.getElementById('cityName').textContent = c;
+            document.getElementById('hotelCnt').textContent = 'Loading...';
+            g.innerHTML = '<p style="color:var(--muted);padding:24px 0">⏳ Loading hotels...</p>';
+
+            let hotels = [];
+            try {
+                const res = await fetch(`${BASE_URL}/api/city/${encodeURIComponent(c)}/services?type=hotel`);
+                const apiData = await res.json();
+                if (apiData.services && apiData.services.length > 0) {
+                    hotels = apiData.services.map(h => ({
+                        n: h.name,
+                        s: 3,
+                        r: '₹2,000–₹6,000/night',
+                        f: 'In-house dining available',
+                        ph: h.phone || '+91-22-2700-0000',
+                        a: `${c}, Navi Mumbai`,
+                        e: '🏨'
+                    }));
+                }
+            } catch (e) { /* offline */ }
+
+            // Fallback to static if API returns nothing
+            if (!hotels.length) {
+                hotels = staticData[c] || staticDef(c);
+            }
+
+            document.getElementById('hotelCnt').textContent = `${hotels.length} hotels found`;
+            g.innerHTML = '';
+            hotels.forEach(h => {
+                const stars = '★'.repeat(h.s) + '☆'.repeat(5 - h.s);
+                const d = document.createElement('div');
+                d.className = 'hcard';
+                d.innerHTML = `<div class="himg"><span>${h.e}</span><div class="himg-addr">📍 ${h.a}</div></div><div class="hbody"><div class="hname">${h.n}</div><div class="hstars">${stars}</div><div class="hmeta"><span class="htag t-price">💰 ${h.r}</span><span class="htag t-food">🍽️ Food</span></div><div class="hinfo"><strong>Food:</strong> ${h.f}<br><strong>📞</strong> ${h.ph}</div><div class="hactions"><button class="btn-map" onclick="openMap('${h.n.replace(/'/g,"\'")} ${c} Navi Mumbai')">📍 Maps</button><button class="btn-call" onclick="window.open('tel:${h.ph}')">📞 Call</button></div></div>`;
+                g.appendChild(d);
+            });
+        }
+
+        function openMap(q) {
+            window.open(`https://www.google.com/maps/search/${encodeURIComponent(q)}`, '_blank');
+        }
+
+        initCities();
+    </script>
+</body>
+
+</html>
