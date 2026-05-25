@@ -1,0 +1,2845 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Map — SafeTrail</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+         :root {
+            --navy: #0a0f1e;
+            --deep: #0d1528;
+            --card: #111827;
+            --accent: #00c9ff;
+            --gold: #f5a623;
+            --danger: #ff4757;
+            --safe: #2ed573;
+            --text: #e8edf5;
+            --muted: #7a8aa0;
+            --border: rgba(0, 201, 255, 0.15)
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--navy);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden
+        }
+        
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            height: 60px;
+            background: rgba(10, 15, 30, .97);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            z-index: 1000
+        }
+        
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 4px
+        }
+        
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: .82rem;
+            padding: 6px 12px;
+            border-radius: 7px;
+            transition: .2s;
+            border: 1px solid transparent;
+            font-weight: 500
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+            border-color: var(--border);
+            background: rgba(255, 255, 255, .04)
+        }
+        
+        .nav-sos {
+            background: var(--danger)!important;
+            color: #fff!important;
+            font-weight: 700!important;
+            animation: sos-p 2s infinite
+        }
+        
+        @keyframes sos-p {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 71, 87, .5)
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(255, 71, 87, 0)
+            }
+        }
+        
+        .layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden
+        }
+        
+        .sb {
+            width: 320px;
+            flex-shrink: 0;
+            background: var(--deep);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px
+        }
+        
+        .sb::-webkit-scrollbar {
+            width: 3px
+        }
+        
+        .sb::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px
+        }
+        
+        .sb-title {
+            font-family: 'Syne', sans-serif;
+            font-size: .88rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text)
+        }
+        /* City Selector */
+        
+        .city-select-box {
+            background: var(--card);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 14px
+        }
+        
+        .city-select-box label {
+            font-size: .73rem;
+            color: var(--accent);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            display: block;
+            margin-bottom: 7px
+        }
+        
+        .city-dropdown {
+            width: 100%;
+            padding: 10px 13px;
+            background: rgba(0, 201, 255, .07);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .9rem;
+            outline: none;
+            cursor: pointer
+        }
+        
+        .city-dropdown option {
+            background: var(--deep);
+            color: var(--text)
+        }
+        
+        .city-info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 9px;
+            font-size: .74rem;
+            color: var(--muted)
+        }
+        
+        .city-info-row span {
+            color: var(--accent);
+            font-weight: 600
+        }
+        /* Filter */
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px
+        }
+        
+        .fb {
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--muted);
+            font-size: .74rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: .2s;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500
+        }
+        
+        .fb.active {
+            border-color: var(--accent);
+            color: var(--text);
+            background: rgba(0, 201, 255, .1)
+        }
+        
+        .fb:hover {
+            border-color: var(--accent);
+            color: var(--text)
+        }
+        /* Status */
+        
+        .status-box {
+            background: var(--card);
+            border: 1px solid var(--safe);
+            border-radius: 12px;
+            padding: 12px
+        }
+        
+        .s-hd {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px
+        }
+        
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--safe);
+            animation: blink 1.5s infinite;
+            flex-shrink: 0
+        }
+        
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1
+            }
+            50% {
+                opacity: .2
+            }
+        }
+        
+        .s-lbl {
+            font-size: .72rem;
+            font-weight: 700;
+            color: var(--safe);
+            text-transform: uppercase;
+            letter-spacing: .6px
+        }
+        
+        .loc-info {
+            font-size: .78rem;
+            color: var(--muted);
+            line-height: 1.9
+        }
+        
+        .loc-info strong {
+            color: var(--text)
+        }
+        /* Distress */
+        
+        .distress-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px
+        }
+        
+        .distress-box.alert {
+            border-color: var(--danger);
+            background: rgba(255, 71, 87, .07)
+        }
+        
+        .d-status {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: .78rem;
+            margin-bottom: 7px
+        }
+        
+        .d-bar {
+            height: 5px;
+            background: rgba(255, 255, 255, .08);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 5px
+        }
+        
+        .d-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width .5s;
+            background: var(--safe)
+        }
+        
+        .d-fill.warn {
+            background: var(--gold)
+        }
+        
+        .d-fill.danger {
+            background: var(--danger)
+        }
+        
+        .d-label {
+            font-size: .72rem;
+            color: var(--muted)
+        }
+        /* Service List */
+        
+        .svc-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 290px;
+            overflow-y: auto
+        }
+        
+        .svc-list::-webkit-scrollbar {
+            width: 2px
+        }
+        
+        .svc-list::-webkit-scrollbar-thumb {
+            background: var(--border)
+        }
+        
+        .ni {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            cursor: pointer;
+            transition: .2s
+        }
+        
+        .ni:hover {
+            border-color: var(--accent);
+            background: rgba(0, 201, 255, .04)
+        }
+        
+        .ni-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            width: 26px;
+            text-align: center
+        }
+        
+        .ni-name {
+            font-size: .79rem;
+            font-weight: 500;
+            line-height: 1.3
+        }
+        
+        .ni-dist {
+            font-size: .69rem;
+            color: var(--muted);
+            margin-top: 2px
+        }
+        
+        .ni-st {
+            margin-left: auto;
+            font-size: .66rem;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0
+        }
+        
+        .st-open {
+            color: var(--safe)
+        }
+        
+        .st-247 {
+            color: var(--accent)
+        }
+        
+        .st-closed {
+            color: var(--danger)
+        }
+        /* Tracker */
+        
+        .tracker-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px
+        }
+        
+        .tracker-box input {
+            width: 100%;
+            padding: 9px 12px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .86rem;
+            margin-bottom: 8px;
+            outline: none
+        }
+        
+        .tracker-box input:focus {
+            border-color: var(--accent)
+        }
+        
+        .btn-full {
+            width: 100%;
+            padding: 9px;
+            background: var(--accent);
+            color: var(--navy);
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Syne', sans-serif;
+            font-size: .8rem;
+            transition: .2s
+        }
+        
+        .btn-full:hover {
+            opacity: .85
+        }
+        
+        .track-result {
+            margin-top: 8px;
+            padding: 9px;
+            background: rgba(0, 201, 255, .07);
+            border: 1px solid rgba(0, 201, 255, .2);
+            border-radius: 7px;
+            font-size: .76rem;
+            color: var(--accent);
+            display: none;
+            line-height: 1.7
+        }
+        /* Map */
+        
+        .map-wrap {
+            flex: 1;
+            position: relative
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%
+        }
+        
+        .map-legend {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(10, 15, 30, .93);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            padding: 12px 16px;
+            z-index: 900;
+            backdrop-filter: blur(8px)
+        }
+        
+        .leg-title {
+            font-family: 'Syne', sans-serif;
+            font-size: .8rem;
+            font-weight: 700;
+            margin-bottom: 8px
+        }
+        
+        .leg-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: .72rem;
+            color: var(--muted);
+            margin-bottom: 3px
+        }
+        
+        .leg-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0
+        }
+        
+        .leg-svc {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border)
+        }
+        
+        .leg-svc span {
+            font-size: .67rem;
+            color: var(--muted)
+        }
+        
+        .city-banner {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 15, 30, .96);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            padding: 8px 18px;
+            z-index: 900;
+            backdrop-filter: blur(8px);
+            font-family: 'Syne', sans-serif;
+            font-size: .88rem;
+            font-weight: 700;
+            color: var(--accent);
+            white-space: nowrap;
+            display: none
+        }
+        
+        .route-box {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
+            background: rgba(10, 15, 30, .95);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            padding: 12px;
+            z-index: 900;
+            backdrop-filter: blur(8px);
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+        
+        .route-box input {
+            flex: 1;
+            padding: 9px 12px;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .82rem;
+            outline: none
+        }
+        
+        .route-box input:focus {
+            border-color: var(--accent)
+        }
+        
+        .route-btn {
+            padding: 9px 16px;
+            background: var(--accent);
+            color: var(--navy);
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Syne', sans-serif;
+            font-size: .8rem;
+            white-space: nowrap
+        }
+        
+        .route-btn:hover {
+            opacity: .88
+        }
+        
+        .distress-popup {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 71, 87, .96);
+            border: 1px solid var(--danger);
+            border-radius: 11px;
+            padding: 12px 20px;
+            z-index: 1000;
+            color: #fff;
+            font-size: .83rem;
+            display: none;
+            text-align: center;
+            box-shadow: 0 4px 28px rgba(255, 71, 87, .55);
+            animation: slideDown .4s ease
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-18px);
+                opacity: 0
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1
+            }
+        }
+        
+        .distress-popup strong {
+            display: block;
+            font-family: 'Syne', sans-serif;
+            font-size: .95rem;
+            margin-bottom: 3px
+        }
+        /* Leaflet dark */
+        
+        .leaflet-container {
+            background: #0a0f1e
+        }
+        
+        .leaflet-tile {
+            filter: invert(1) hue-rotate(180deg) brightness(.72) contrast(1.1) saturate(.55)
+        }
+        
+        .leaflet-control-zoom a {
+            background: var(--deep)!important;
+            color: var(--accent)!important;
+            border: 1px solid var(--border)!important
+        }
+        
+        .leaflet-control-attribution {
+            background: rgba(10, 15, 30, .8)!important;
+            color: var(--muted)!important;
+            font-size: .62rem!important
+        }
+        
+        .leaflet-popup-content-wrapper {
+            background: var(--deep)!important;
+            border: 1px solid var(--border)!important;
+            color: var(--text)!important;
+            border-radius: 11px!important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, .5)!important
+        }
+        
+        .leaflet-popup-tip {
+            background: var(--deep)!important
+        }
+        
+        .leaflet-popup-content {
+            margin: 12px 14px!important;
+            font-size: .84rem;
+            line-height: 1.6
+        }
+        
+        .leaflet-routing-container {
+            display: none!important
+        }
+
+        /* ── USER PROFILE CARD ── */
+        .user-card {
+            background: linear-gradient(135deg, rgba(0,201,255,0.08), rgba(0,119,255,0.06));
+            border: 1px solid rgba(0,201,255,0.25);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 2px;
+        }
+        .user-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .user-avatar {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00c9ff, #0077ff);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+        }
+        .user-name-txt {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: .9rem;
+            color: var(--text);
+        }
+        .user-city-txt {
+            font-size: .72rem;
+            color: var(--accent);
+        }
+        .user-detail-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 5px;
+            font-size: .75rem;
+            color: var(--muted);
+        }
+        .user-detail-row strong { color: var(--text); }
+        .user-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .ub { 
+            flex: 1; padding: 7px 4px; border: none; border-radius: 7px;
+            font-size: .72rem; font-weight: 600; cursor: pointer; transition: .2s;
+        }
+        .ub-call { background: rgba(46,213,115,.15); color: #2ed573; border: 1px solid rgba(46,213,115,.25); }
+        .ub-call:hover { background: rgba(46,213,115,.3); }
+        .ub-msg  { background: rgba(0,201,255,.12); color: #00c9ff; border: 1px solid rgba(0,201,255,.25); }
+        .ub-msg:hover { background: rgba(0,201,255,.25); }
+        .ub-sos  { background: rgba(255,71,87,.15); color: #ff4757; border: 1px solid rgba(255,71,87,.25); }
+        .ub-sos:hover { background: rgba(255,71,87,.3); }
+        .not-logged { 
+            text-align:center; padding:14px; font-size:.8rem; color:var(--muted);
+        }
+        .not-logged a { color:var(--accent); }
+        /* Live pulse marker */
+        @keyframes livePulse {
+            0%   { transform: scale(1);   opacity: 1; }
+            70%  { transform: scale(3.5); opacity: 0; }
+            100% { transform: scale(1);   opacity: 0; }
+        }
+        .live-marker-outer {
+            position: relative; width: 20px; height: 20px;
+        }
+        .live-marker-inner {
+            width: 14px; height: 14px;
+            background: #00c9ff;
+            border: 2.5px solid #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px; left: 3px;
+            box-shadow: 0 0 8px rgba(0,201,255,0.8);
+            z-index: 2;
+        }
+        .live-marker-pulse {
+            width: 14px; height: 14px;
+            background: rgba(0,201,255,0.5);
+            border-radius: 50%;
+            position: absolute;
+            top: 3px; left: 3px;
+            animation: livePulse 1.8s ease-out infinite;
+        }
+        /* Location accuracy circle override */
+        .accuracy-circle { }
+
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="index.html" class="logo">🛡️ SafeTrail</a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="map.html" class="active">Live Map</a>
+            <a href="hotels.html">Hotels</a>
+            <a href="services.html">Services</a>
+            <a href="sos.html" class="nav-sos">🆘 SOS</a>
+        </div>
+    </nav>
+    <div class="layout">
+        <div class="sb">
+            <!-- USER PROFILE CARD -->
+            <div id="userProfileCard">
+                <div class="not-logged">Not logged in. <a href="index.html">Register / Login →</a></div>
+            </div>
+            <!-- CITY SELECTOR -->
+            <div>
+                <div class="sb-title">🏙️ Select City</div>
+                <div class="city-select-box">
+                    <label>Navi Mumbai City</label>
+                    <select class="city-dropdown" id="citySelect" onchange="onCityChange()">
+          <option value="">— Choose a city —</option>
+          <option value="Vashi">Vashi</option>
+          <option value="Nerul">Nerul</option>
+          <option value="Belapur">CBD Belapur</option>
+          <option value="Kharghar">Kharghar</option>
+          <option value="Panvel">Panvel</option>
+          <option value="Airoli">Airoli</option>
+          <option value="Ghansoli">Ghansoli</option>
+          <option value="Turbhe">Turbhe</option>
+          <option value="Koparkhairane">Koparkhairane</option>
+          <option value="Sanpada">Sanpada</option>
+          <option value="Juinagar">Juinagar</option>
+          <option value="Seawoods">Seawoods</option>
+          <option value="Ulwe">Ulwe</option>
+          <option value="Dronagiri">Dronagiri</option>
+          <option value="Taloja">Taloja</option>
+          <option value="Kamothe">Kamothe</option>
+          <option value="Kalamboli">Kalamboli</option>
+          <option value="New Panvel">New Panvel</option>
+          <option value="Roadpali">Roadpali</option>
+          <option value="Khandeshwar">Khandeshwar</option>
+          <option value="Nhava Sheva">Nhava Sheva</option>
+          <option value="Uran">Uran</option>
+          <option value="Pen">Pen</option>
+        </select>
+                    <div class="city-info-row">
+                        <span id="cityServicesCount">Select a city to load services</span>
+                        <span id="cityZoneInfo"></span>
+                    </div>
+                </div>
+            </div>
+            <!-- FILTERS -->
+            <div>
+                <div class="sb-title">🔍 Filter Services</div>
+                <div class="filter-grid">
+                    <button class="fb active" id="fb-hospital" onclick="toggleFilter('hospital',this)">🏥 Hospital</button>
+                    <button class="fb active" id="fb-police" onclick="toggleFilter('police',this)">👮 Police</button>
+                    <button class="fb active" id="fb-pharmacy" onclick="toggleFilter('pharmacy',this)">💊 Pharmacy</button>
+                    <button class="fb active" id="fb-bank" onclick="toggleFilter('bank',this)">🏦 Bank</button>
+                    <button class="fb active" id="fb-hotel" onclick="toggleFilter('hotel',this)">🏨 Hotel</button>
+                    <button class="fb active" id="fb-restaurant" onclick="toggleFilter('restaurant',this)">🍽️ Food</button>
+                    <button class="fb active" id="fb-transport" onclick="toggleFilter('transport',this)">🚌 Transport</button>
+                    <button class="fb active" id="fb-atm" onclick="toggleFilter('atm',this)">💳 ATM</button>
+                </div>
+            </div>
+            <!-- GPS STATUS -->
+            <div>
+                <div class="sb-title">📍 Your Location</div>
+                <div class="status-box">
+                    <div class="s-hd">
+                        <div class="dot" id="locDot"></div><span class="s-lbl" id="locLbl">Detecting...</span></div>
+                    <div class="loc-info" id="locInfo">Acquiring GPS...<br>Zone: <strong>—</strong><br>Nearest City: <strong id="userCityDetected">—</strong></div>
+                </div>
+            </div>
+            <!-- AI DISTRESS -->
+            <div>
+                <div class="sb-title">🤖 AI Distress Monitor</div>
+                <div class="distress-box" id="distressBox">
+                    <div class="d-status">
+                        <div class="dot" id="aiDot"></div><span id="aiStatus" style="font-size:.78rem">Monitoring...</span></div>
+                    <div class="d-bar">
+                        <div class="d-fill" id="distressFill" style="width:5%"></div>
+                    </div>
+                    <div class="d-label" id="distressLabel">Distress: Normal</div>
+                    <div id="distressTimer" style="font-size:.7rem;color:var(--muted);margin-top:5px"></div>
+                </div>
+            </div>
+            <!-- SERVICE LIST -->
+            <div>
+                <div class="sb-title" id="svcListTitle">📌 City Services</div>
+                <div class="svc-list" id="svcList">
+                    <div style="font-size:.78rem;color:var(--muted);text-align:center;padding:18px">☝️ Select a city above</div>
+                </div>
+            </div>
+            <!-- PHONE TRACKER -->
+            <div>
+                <div class="sb-title">📱 Phone Tracker</div>
+                <div class="tracker-box">
+                    <input type="tel" id="trackPh" placeholder="Enter phone (+91...)" />
+                    <button class="btn-full" onclick="trackPhone()">🔍 Locate Device</button>
+                    <div class="track-result" id="trackRes"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAP -->
+        <div class="map-wrap">
+            <div class="distress-popup" id="distressPopup"><strong>🚨 DISTRESS DETECTED</strong>Auto-alerting emergency + Police...</div>
+            <div class="city-banner" id="cityBanner"></div>
+            <div class="map-legend">
+                <div class="leg-title">🗺️ Legend</div>
+                <div class="leg-row">
+                    <div class="leg-dot" style="background:#2ed573"></div>Safe Zone</div>
+                <div class="leg-row">
+                    <div class="leg-dot" style="background:#f5a623"></div>Caution Zone</div>
+                <div class="leg-row">
+                    <div class="leg-dot" style="background:#ff4757"></div>High-Risk Zone</div>
+                <div class="leg-row">
+                    <div class="leg-dot" style="background:#00c9ff"></div>You</div>
+                <div class="leg-svc">
+                    <span>🏥 Hosp</span><span>👮 Police</span><span>💊 Pharma</span>
+                    <span>🏦 Bank</span><span>🏨 Hotel</span><span>🍽️ Food</span><span>🚌 Bus</span>
+                </div>
+            </div>
+            <div id="map"></div>
+            <div class="route-box">
+                <input id="origin" placeholder="📍 From" value="Vashi, Navi Mumbai" />
+                <input id="dest" placeholder="🏁 To (e.g. CSMT Mumbai)" />
+                <button class="route-btn" onclick="getRoute()">Get Route →</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script>
+        const BASE_URL = 'http://127.0.0.1:5500';
+        // ══════════════════════════════════════════
+        // ALL NAVI MUMBAI CITY DATA WITH SERVICES
+        // ══════════════════════════════════════════
+        const CITY_DATA = {
+            "Vashi": {
+                center: [19.0771, 73.0084],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "MGM Hospital Vashi",
+                    lat: 19.0790,
+                    lng: 73.0075,
+                    phone: "022-2765-7777",
+                    open: "24/7"
+                }, {
+                    type: "hospital",
+                    name: "Fortis Hiranandani Hosp",
+                    lat: 19.0730,
+                    lng: 73.0110,
+                    phone: "022-6742-2000",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Vashi Police Station",
+                    lat: 19.0755,
+                    lng: 73.0070,
+                    phone: "022-2765-8200",
+                    open: "24/7"
+                }, {
+                    type: "police",
+                    name: "Sector-17 Police Chowki",
+                    lat: 19.0785,
+                    lng: 73.0065,
+                    phone: "022-2765-9100",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Apollo Pharmacy Vashi",
+                    lat: 19.0780,
+                    lng: 73.0090,
+                    phone: "1860-500-0101",
+                    open: "Open"
+                }, {
+                    type: "pharmacy",
+                    name: "MedPlus Vashi",
+                    lat: 19.0762,
+                    lng: 73.0088,
+                    phone: "040-6715-1515",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Bank Vashi",
+                    lat: 19.0758,
+                    lng: 73.0076,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "HDFC Bank Vashi",
+                    lat: 19.0770,
+                    lng: 73.0060,
+                    phone: "1800-202-6161",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "SBI ATM Sector-17",
+                    lat: 19.0765,
+                    lng: 73.0055,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "atm",
+                    name: "ICICI ATM Vashi",
+                    lat: 19.0750,
+                    lng: 73.0095,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Regency Vashi",
+                    lat: 19.0760,
+                    lng: 73.0095,
+                    phone: "022-2765-0000",
+                    open: "Open"
+                }, {
+                    type: "hotel",
+                    name: "OYO Rooms Vashi Station",
+                    lat: 19.0745,
+                    lng: 73.0083,
+                    phone: "0800-825-8258",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Mainland China Vashi",
+                    lat: 19.0742,
+                    lng: 73.0110,
+                    phone: "022-6741-9999",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "McDonald's Vashi",
+                    lat: 19.0755,
+                    lng: 73.0070,
+                    phone: "1860-500-6666",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Vashi Railway Station",
+                    lat: 19.0771,
+                    lng: 73.0084,
+                    phone: "139",
+                    open: "24/7"
+                }, {
+                    type: "transport",
+                    name: "Vashi Bus Depot",
+                    lat: 19.0780,
+                    lng: 73.0075,
+                    phone: "022-2765-5050",
+                    open: "24/7"
+                }, ]
+            },
+            "Nerul": {
+                center: [19.0321, 73.0177],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "DY Patil Hospital Nerul",
+                    lat: 19.0350,
+                    lng: 73.0200,
+                    phone: "022-2771-5555",
+                    open: "24/7"
+                }, {
+                    type: "hospital",
+                    name: "Nerul Govt Hospital",
+                    lat: 19.0300,
+                    lng: 73.0160,
+                    phone: "022-2771-6600",
+                    open: "24/7"
+                }, {
+                    type: "police",
+                    name: "Nerul Police Station",
+                    lat: 19.0315,
+                    lng: 73.0180,
+                    phone: "022-2771-8201",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Apollo Pharmacy Nerul",
+                    lat: 19.0330,
+                    lng: 73.0195,
+                    phone: "1860-500-0101",
+                    open: "Open"
+                }, {
+                    type: "pharmacy",
+                    name: "Jan Aushadhi Nerul",
+                    lat: 19.0310,
+                    lng: 73.0170,
+                    phone: "1800-180-8080",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Nerul Branch",
+                    lat: 19.0325,
+                    lng: 73.0165,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "Bk of Maharashtra Nerul",
+                    lat: 19.0340,
+                    lng: 73.0185,
+                    phone: "1800-233-4526",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "HDFC ATM Nerul",
+                    lat: 19.0318,
+                    lng: 73.0175,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Nerul Executive",
+                    lat: 19.0330,
+                    lng: 73.0200,
+                    phone: "022-2771-0000",
+                    open: "Open"
+                }, {
+                    type: "hotel",
+                    name: "Treebo Hotel Nerul",
+                    lat: 19.0308,
+                    lng: 73.0190,
+                    phone: "093-1050-5050",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Café Coffee Day Nerul",
+                    lat: 19.0322,
+                    lng: 73.0178,
+                    phone: "1860-500-2233",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Domino's Pizza Nerul",
+                    lat: 19.0335,
+                    lng: 73.0165,
+                    phone: "1800-208-1234",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Nerul Railway Station",
+                    lat: 19.0321,
+                    lng: 73.0177,
+                    phone: "139",
+                    open: "24/7"
+                }, ]
+            },
+            "Belapur": {
+                center: [19.0148, 73.0389],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Belapur District Hospital",
+                    lat: 19.0160,
+                    lng: 73.0400,
+                    phone: "022-2757-5555",
+                    open: "24/7"
+                }, {
+                    type: "hospital",
+                    name: "Apollo Clinic Belapur",
+                    lat: 19.0138,
+                    lng: 73.0380,
+                    phone: "022-6742-3000",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Belapur Police Station",
+                    lat: 19.0155,
+                    lng: 73.0370,
+                    phone: "022-2757-8200",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Apollo Pharmacy Belapur",
+                    lat: 19.0148,
+                    lng: 73.0395,
+                    phone: "1860-500-0101",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI CBD Belapur",
+                    lat: 19.0142,
+                    lng: 73.0385,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "HDFC Bank Belapur",
+                    lat: 19.0160,
+                    lng: 73.0375,
+                    phone: "1800-202-6161",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "ICICI ATM Belapur",
+                    lat: 19.0150,
+                    lng: 73.0390,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Ramada by Wyndham",
+                    lat: 19.0148,
+                    lng: 73.0395,
+                    phone: "022-6730-7000",
+                    open: "Open"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Sagar Plaza",
+                    lat: 19.0135,
+                    lng: 73.0400,
+                    phone: "022-2757-2222",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Food Mall Belapur",
+                    lat: 19.0152,
+                    lng: 73.0382,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "CBD Belapur Station",
+                    lat: 19.0148,
+                    lng: 73.0389,
+                    phone: "139",
+                    open: "24/7"
+                }, {
+                    type: "transport",
+                    name: "Belapur Bus Stop",
+                    lat: 19.0155,
+                    lng: 73.0378,
+                    phone: "",
+                    open: "24/7"
+                }, ]
+            },
+            "Kharghar": {
+                center: [19.0474, 73.0692],
+                zoom: 14,
+                zone: "CAUTION",
+                services: [{
+                    type: "hospital",
+                    name: "Kharghar Hospital",
+                    lat: 19.0490,
+                    lng: 73.0700,
+                    phone: "022-2774-5555",
+                    open: "24/7"
+                }, {
+                    type: "hospital",
+                    name: "Life Care Clinic",
+                    lat: 19.0460,
+                    lng: 73.0685,
+                    phone: "022-2774-6600",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Kharghar Police Station",
+                    lat: 19.0470,
+                    lng: 73.0680,
+                    phone: "022-2774-8200",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Apollo Pharmacy Kharghar",
+                    lat: 19.0480,
+                    lng: 73.0695,
+                    phone: "1860-500-0101",
+                    open: "Open"
+                }, {
+                    type: "pharmacy",
+                    name: "Jan Aushadhi Kharghar",
+                    lat: 19.0465,
+                    lng: 73.0705,
+                    phone: "1800-180-8080",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Kharghar",
+                    lat: 19.0475,
+                    lng: 73.0688,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "Axis Bank Kharghar",
+                    lat: 19.0488,
+                    lng: 73.0675,
+                    phone: "1800-419-5959",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "HDFC ATM Kharghar",
+                    lat: 19.0472,
+                    lng: 73.0695,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Hilton Kharghar",
+                    lat: 19.0478,
+                    lng: 73.0700,
+                    phone: "022-2799-0000",
+                    open: "Open"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Sai Krupa",
+                    lat: 19.0462,
+                    lng: 73.0690,
+                    phone: "022-2774-1111",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Domino's Kharghar",
+                    lat: 19.0470,
+                    lng: 73.0682,
+                    phone: "1800-208-1234",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "KFC Kharghar",
+                    lat: 19.0485,
+                    lng: 73.0672,
+                    phone: "1800-209-2942",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Kharghar Railway Station",
+                    lat: 19.0474,
+                    lng: 73.0692,
+                    phone: "139",
+                    open: "24/7"
+                }, ]
+            },
+            "Panvel": {
+                center: [18.9894, 73.1175],
+                zoom: 14,
+                zone: "HIGH_RISK",
+                services: [{
+                    type: "hospital",
+                    name: "Raigad Dist Hospital",
+                    lat: 18.9910,
+                    lng: 73.1190,
+                    phone: "022-2745-0101",
+                    open: "24/7"
+                }, {
+                    type: "hospital",
+                    name: "Panvel Multispeciality",
+                    lat: 18.9875,
+                    lng: 73.1160,
+                    phone: "022-2740-2222",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Panvel Police Station",
+                    lat: 18.9900,
+                    lng: 73.1168,
+                    phone: "022-2746-8200",
+                    open: "24/7"
+                }, {
+                    type: "police",
+                    name: "New Panvel Police Chowki",
+                    lat: 18.9888,
+                    lng: 73.1185,
+                    phone: "022-2746-9100",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Apollo Pharmacy Panvel",
+                    lat: 18.9895,
+                    lng: 73.1178,
+                    phone: "1860-500-0101",
+                    open: "Open"
+                }, {
+                    type: "pharmacy",
+                    name: "MedPlus Panvel",
+                    lat: 18.9882,
+                    lng: 73.1162,
+                    phone: "040-6715-1515",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Panvel Main Branch",
+                    lat: 18.9898,
+                    lng: 73.1172,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "Bank of India Panvel",
+                    lat: 18.9885,
+                    lng: 73.1188,
+                    phone: "1800-220-229",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "SBI ATM Panvel Station",
+                    lat: 18.9892,
+                    lng: 73.1175,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Presidency Panvel",
+                    lat: 18.9905,
+                    lng: 73.1165,
+                    phone: "022-2740-0000",
+                    open: "Open"
+                }, {
+                    type: "hotel",
+                    name: "Comfort Inn Panvel",
+                    lat: 18.9878,
+                    lng: 73.1195,
+                    phone: "022-2746-5555",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Maratha Bhojanalaya",
+                    lat: 18.9895,
+                    lng: 73.1180,
+                    phone: "022-2741-3333",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Subway Panvel",
+                    lat: 18.9880,
+                    lng: 73.1165,
+                    phone: "1800-208-1234",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Panvel Railway Station",
+                    lat: 18.9894,
+                    lng: 73.1175,
+                    phone: "139",
+                    open: "24/7"
+                }, {
+                    type: "transport",
+                    name: "MSRTC Bus Depot Panvel",
+                    lat: 18.9902,
+                    lng: 73.1160,
+                    phone: "020-2612-5740",
+                    open: "24/7"
+                }, ]
+            },
+            "Airoli": {
+                center: [19.1557, 73.0169],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Airoli Govt Hospital",
+                    lat: 19.1565,
+                    lng: 73.0180,
+                    phone: "022-2769-5555",
+                    open: "24/7"
+                }, {
+                    type: "police",
+                    name: "Airoli Police Station",
+                    lat: 19.1550,
+                    lng: 73.0162,
+                    phone: "022-2769-8200",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Apollo Pharmacy Airoli",
+                    lat: 19.1558,
+                    lng: 73.0175,
+                    phone: "1860-500-0101",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Airoli Branch",
+                    lat: 19.1562,
+                    lng: 73.0165,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "HDFC ATM Airoli",
+                    lat: 19.1555,
+                    lng: 73.0172,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Airoli Business Hotel",
+                    lat: 19.1560,
+                    lng: 73.0180,
+                    phone: "022-2769-4444",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Airoli Food Court",
+                    lat: 19.1548,
+                    lng: 73.0168,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Airoli Railway Station",
+                    lat: 19.1557,
+                    lng: 73.0169,
+                    phone: "139",
+                    open: "24/7"
+                }, ]
+            },
+            "Ghansoli": {
+                center: [19.1157, 73.0131],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Ghansoli Medical Centre",
+                    lat: 19.1165,
+                    lng: 73.0140,
+                    phone: "022-2763-5555",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Ghansoli Police Station",
+                    lat: 19.1150,
+                    lng: 73.0125,
+                    phone: "022-2763-8200",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "MedPlus Ghansoli",
+                    lat: 19.1158,
+                    lng: 73.0135,
+                    phone: "040-6715-1515",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Ghansoli",
+                    lat: 19.1162,
+                    lng: 73.0128,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "ICICI ATM Ghansoli",
+                    lat: 19.1155,
+                    lng: 73.0133,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Ghansoli Inn",
+                    lat: 19.1160,
+                    lng: 73.0142,
+                    phone: "022-2763-0000",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Ghansoli Dhaba",
+                    lat: 19.1152,
+                    lng: 73.0130,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Ghansoli Railway Station",
+                    lat: 19.1157,
+                    lng: 73.0131,
+                    phone: "139",
+                    open: "24/7"
+                }, ]
+            },
+            "Turbhe": {
+                center: [19.0865, 73.0203],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Turbhe MIDC Hospital",
+                    lat: 19.0875,
+                    lng: 73.0210,
+                    phone: "022-2768-5555",
+                    open: "24/7"
+                }, {
+                    type: "police",
+                    name: "Turbhe Police Station",
+                    lat: 19.0858,
+                    lng: 73.0198,
+                    phone: "022-2768-8200",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Apollo Pharmacy Turbhe",
+                    lat: 19.0868,
+                    lng: 73.0205,
+                    phone: "1860-500-0101",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "Bk of Maharashtra Turbhe",
+                    lat: 19.0872,
+                    lng: 73.0195,
+                    phone: "1800-233-4526",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "SBI ATM Turbhe",
+                    lat: 19.0862,
+                    lng: 73.0208,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Park Turbhe",
+                    lat: 19.0870,
+                    lng: 73.0215,
+                    phone: "022-2768-5555",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Turbhe Food Zone",
+                    lat: 19.0860,
+                    lng: 73.0200,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Turbhe Railway Station",
+                    lat: 19.0865,
+                    lng: 73.0203,
+                    phone: "139",
+                    open: "24/7"
+                }, ]
+            },
+            "Koparkhairane": {
+                center: [19.1003, 73.0116],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Koparkhairane Hospital",
+                    lat: 19.1012,
+                    lng: 73.0125,
+                    phone: "022-2766-5555",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Koparkhairane PS",
+                    lat: 19.0998,
+                    lng: 73.0110,
+                    phone: "022-2766-8200",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "MedPlus Koparkhairane",
+                    lat: 19.1005,
+                    lng: 73.0118,
+                    phone: "040-6715-1515",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Koparkhairane",
+                    lat: 19.1008,
+                    lng: 73.0108,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "HDFC ATM Koparkhairane",
+                    lat: 19.1001,
+                    lng: 73.0120,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Kopar Inn",
+                    lat: 19.1010,
+                    lng: 73.0128,
+                    phone: "022-2766-0000",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Food Plaza Koparkhairane",
+                    lat: 19.0995,
+                    lng: 73.0115,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Koparkhairane Station",
+                    lat: 19.1003,
+                    lng: 73.0116,
+                    phone: "139",
+                    open: "24/7"
+                }, ]
+            },
+            "Sanpada": {
+                center: [19.0567, 73.0104],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Sanpada Medical Centre",
+                    lat: 19.0575,
+                    lng: 73.0112,
+                    phone: "022-2756-5555",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Sanpada Police Station",
+                    lat: 19.0560,
+                    lng: 73.0098,
+                    phone: "022-2756-8500",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Apollo Pharmacy Sanpada",
+                    lat: 19.0570,
+                    lng: 73.0107,
+                    phone: "1860-500-0101",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "HDFC Bank Sanpada",
+                    lat: 19.0572,
+                    lng: 73.0098,
+                    phone: "1800-202-6161",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "SBI ATM Sanpada",
+                    lat: 19.0564,
+                    lng: 73.0105,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Sanpada",
+                    lat: 19.0578,
+                    lng: 73.0115,
+                    phone: "022-2756-0000",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Café Sanpada",
+                    lat: 19.0562,
+                    lng: 73.0100,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Sanpada Railway Station",
+                    lat: 19.0567,
+                    lng: 73.0104,
+                    phone: "139",
+                    open: "24/7"
+                }, ]
+            },
+            "Juinagar": {
+                center: [19.0450, 73.0140],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Juinagar Hospital",
+                    lat: 19.0460,
+                    lng: 73.0150,
+                    phone: "022-2770-5555",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Juinagar Police Chowki",
+                    lat: 19.0442,
+                    lng: 73.0133,
+                    phone: "022-2770-8200",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "MedPlus Juinagar",
+                    lat: 19.0452,
+                    lng: 73.0142,
+                    phone: "040-6715-1515",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Juinagar",
+                    lat: 19.0456,
+                    lng: 73.0135,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "ICICI ATM Juinagar",
+                    lat: 19.0448,
+                    lng: 73.0145,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Juinagar",
+                    lat: 19.0458,
+                    lng: 73.0148,
+                    phone: "022-2770-0000",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Juinagar Dhaba",
+                    lat: 19.0444,
+                    lng: 73.0138,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Juinagar Railway Station",
+                    lat: 19.0450,
+                    lng: 73.0140,
+                    phone: "139",
+                    open: "24/7"
+                }, ]
+            },
+            "Seawoods": {
+                center: [19.0186, 73.0150],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Seawoods Medical Centre",
+                    lat: 19.0195,
+                    lng: 73.0160,
+                    phone: "022-6152-5555",
+                    open: "Open"
+                }, {
+                    type: "hospital",
+                    name: "Fortis Seawoods",
+                    lat: 19.0175,
+                    lng: 73.0142,
+                    phone: "022-6152-6000",
+                    open: "24/7"
+                }, {
+                    type: "police",
+                    name: "Seawoods Police Station",
+                    lat: 19.0182,
+                    lng: 73.0148,
+                    phone: "022-2771-8300",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Apollo Pharmacy Seawoods",
+                    lat: 19.0190,
+                    lng: 73.0155,
+                    phone: "1860-500-0101",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "HDFC Seawoods Grand",
+                    lat: 19.0185,
+                    lng: 73.0145,
+                    phone: "1800-202-6161",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "SBI ATM Seawoods Mall",
+                    lat: 19.0188,
+                    lng: 73.0152,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Novotel Seawoods",
+                    lat: 19.0192,
+                    lng: 73.0158,
+                    phone: "022-6152-6000",
+                    open: "Open"
+                }, {
+                    type: "hotel",
+                    name: "Holiday Inn Seawoods",
+                    lat: 19.0178,
+                    lng: 73.0148,
+                    phone: "022-6666-7777",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Grand Food Court",
+                    lat: 19.0186,
+                    lng: 73.0155,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Pizza Hut Seawoods",
+                    lat: 19.0180,
+                    lng: 73.0142,
+                    phone: "1800-202-2222",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Seawoods-Darave Station",
+                    lat: 19.0186,
+                    lng: 73.0150,
+                    phone: "139",
+                    open: "24/7"
+                }, ]
+            },
+            "Ulwe": {
+                center: [18.9659, 73.0364],
+                zoom: 14,
+                zone: "CAUTION",
+                services: [{
+                    type: "hospital",
+                    name: "Ulwe Primary Health Centre",
+                    lat: 18.9668,
+                    lng: 73.0372,
+                    phone: "022-2770-1111",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Ulwe Police Station",
+                    lat: 18.9652,
+                    lng: 73.0358,
+                    phone: "022-2770-8400",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Jan Aushadhi Ulwe",
+                    lat: 18.9662,
+                    lng: 73.0368,
+                    phone: "1800-180-8080",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Ulwe",
+                    lat: 18.9656,
+                    lng: 73.0360,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "SBI ATM Ulwe",
+                    lat: 18.9660,
+                    lng: 73.0365,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Ulwe",
+                    lat: 18.9668,
+                    lng: 73.0375,
+                    phone: "022-2770-0000",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Ulwe Food Stalls",
+                    lat: 18.9654,
+                    lng: 73.0362,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Ulwe Bus Stop",
+                    lat: 18.9659,
+                    lng: 73.0364,
+                    phone: "",
+                    open: "24/7"
+                }, ]
+            },
+            "Dronagiri": {
+                center: [18.9500, 72.9700],
+                zoom: 14,
+                zone: "CAUTION",
+                services: [{
+                    type: "hospital",
+                    name: "Dronagiri PHC",
+                    lat: 18.9510,
+                    lng: 72.9710,
+                    phone: "022-2770-2222",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Dronagiri Police Post",
+                    lat: 18.9492,
+                    lng: 72.9692,
+                    phone: "022-2770-8500",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Dronagiri Medical Store",
+                    lat: 18.9502,
+                    lng: 72.9705,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Dronagiri",
+                    lat: 18.9498,
+                    lng: 72.9698,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Dronagiri Ferry Point",
+                    lat: 18.9505,
+                    lng: 72.9715,
+                    phone: "",
+                    open: "24/7"
+                }, ]
+            },
+            "Taloja": {
+                center: [19.0010, 73.1292],
+                zoom: 14,
+                zone: "CAUTION",
+                services: [{
+                    type: "hospital",
+                    name: "Taloja PHC",
+                    lat: 19.0020,
+                    lng: 73.1300,
+                    phone: "022-2745-3333",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Taloja Police Station",
+                    lat: 19.0002,
+                    lng: 73.1285,
+                    phone: "022-2745-8600",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Jan Aushadhi Taloja",
+                    lat: 19.0012,
+                    lng: 73.1294,
+                    phone: "1800-180-8080",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Taloja",
+                    lat: 19.0006,
+                    lng: 73.1288,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "SBI ATM Taloja",
+                    lat: 19.0010,
+                    lng: 73.1292,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Taloja",
+                    lat: 19.0018,
+                    lng: 73.1302,
+                    phone: "022-2745-0000",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Taloja Dhaba",
+                    lat: 19.0004,
+                    lng: 73.1288,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Taloja MIDC Bus Stop",
+                    lat: 19.0010,
+                    lng: 73.1292,
+                    phone: "",
+                    open: "24/7"
+                }, ]
+            },
+            "Kamothe": {
+                center: [19.0170, 73.0858],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Kamothe Hospital",
+                    lat: 19.0180,
+                    lng: 73.0865,
+                    phone: "022-2740-5555",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Kamothe Police Station",
+                    lat: 19.0162,
+                    lng: 73.0852,
+                    phone: "022-2740-9200",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Apollo Pharmacy Kamothe",
+                    lat: 19.0172,
+                    lng: 73.0860,
+                    phone: "1860-500-0101",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Kamothe",
+                    lat: 19.0175,
+                    lng: 73.0850,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "HDFC ATM Kamothe",
+                    lat: 19.0168,
+                    lng: 73.0860,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Saffron Kamothe",
+                    lat: 19.0178,
+                    lng: 73.0868,
+                    phone: "022-2740-8888",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Kamothe Food Court",
+                    lat: 19.0164,
+                    lng: 73.0855,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Kamothe Bus Stop",
+                    lat: 19.0170,
+                    lng: 73.0858,
+                    phone: "",
+                    open: "24/7"
+                }, ]
+            },
+            "Kalamboli": {
+                center: [19.0285, 73.0985],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Kalamboli Medical",
+                    lat: 19.0295,
+                    lng: 73.0992,
+                    phone: "022-2741-5555",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Kalamboli Police Station",
+                    lat: 19.0278,
+                    lng: 73.0980,
+                    phone: "022-2741-8600",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "MedPlus Kalamboli",
+                    lat: 19.0288,
+                    lng: 73.0988,
+                    phone: "040-6715-1515",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "Bank of Maharashtra",
+                    lat: 19.0282,
+                    lng: 73.0982,
+                    phone: "1800-233-4526",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "SBI ATM Kalamboli",
+                    lat: 19.0285,
+                    lng: 73.0985,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "Hotel Grand Kalamboli",
+                    lat: 19.0292,
+                    lng: 73.0995,
+                    phone: "022-2741-0000",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "Highway Dhaba Kalamboli",
+                    lat: 19.0280,
+                    lng: 73.0980,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Kalamboli Bus Depot",
+                    lat: 19.0285,
+                    lng: 73.0985,
+                    phone: "",
+                    open: "24/7"
+                }, ]
+            },
+            "New Panvel": {
+                center: [18.9952, 73.1108],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "New Panvel Hospital",
+                    lat: 18.9960,
+                    lng: 73.1118,
+                    phone: "022-2748-5555",
+                    open: "24/7"
+                }, {
+                    type: "police",
+                    name: "New Panvel Police Station",
+                    lat: 18.9945,
+                    lng: 73.1102,
+                    phone: "022-2748-8600",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Apollo New Panvel",
+                    lat: 18.9954,
+                    lng: 73.1112,
+                    phone: "1860-500-0101",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI New Panvel",
+                    lat: 18.9958,
+                    lng: 73.1105,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "atm",
+                    name: "ICICI ATM New Panvel",
+                    lat: 18.9950,
+                    lng: 73.1110,
+                    phone: "",
+                    open: "24/7"
+                }, {
+                    type: "hotel",
+                    name: "OYO Townhouse New Panvel",
+                    lat: 18.9962,
+                    lng: 73.1120,
+                    phone: "080-8025-8258",
+                    open: "Open"
+                }, {
+                    type: "restaurant",
+                    name: "McDonald's New Panvel",
+                    lat: 18.9948,
+                    lng: 73.1100,
+                    phone: "1860-500-6666",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "New Panvel Bus Stand",
+                    lat: 18.9952,
+                    lng: 73.1108,
+                    phone: "",
+                    open: "24/7"
+                }, ]
+            },
+            "Roadpali": {
+                center: [19.0092, 73.0885],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Roadpali PHC",
+                    lat: 19.0100,
+                    lng: 73.0892,
+                    phone: "022-2742-1111",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Roadpali Police Chowki",
+                    lat: 19.0085,
+                    lng: 73.0878,
+                    phone: "022-2742-8700",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Roadpali Medical Store",
+                    lat: 19.0093,
+                    lng: 73.0888,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Roadpali",
+                    lat: 19.0096,
+                    lng: 73.0882,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Roadpali Bus Stop",
+                    lat: 19.0092,
+                    lng: 73.0885,
+                    phone: "",
+                    open: "24/7"
+                }, ]
+            },
+            "Khandeshwar": {
+                center: [19.0040, 73.0750],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Khandeshwar PHC",
+                    lat: 19.0050,
+                    lng: 73.0758,
+                    phone: "022-2742-2222",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Khandeshwar Police Post",
+                    lat: 19.0032,
+                    lng: 73.0742,
+                    phone: "022-2742-8800",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Khandeshwar Medical",
+                    lat: 19.0042,
+                    lng: 73.0752,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "Kotak Bank Khandeshwar",
+                    lat: 19.0045,
+                    lng: 73.0748,
+                    phone: "1800-209-0000",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Khandeshwar Station",
+                    lat: 19.0040,
+                    lng: 73.0750,
+                    phone: "139",
+                    open: "24/7"
+                }, ]
+            },
+            "Nhava Sheva": {
+                center: [18.9540, 72.9450],
+                zoom: 14,
+                zone: "CAUTION",
+                services: [{
+                    type: "hospital",
+                    name: "Nhava Sheva Port Hospital",
+                    lat: 18.9550,
+                    lng: 72.9460,
+                    phone: "022-2724-1111",
+                    open: "24/7"
+                }, {
+                    type: "police",
+                    name: "Nhava Sheva Police Post",
+                    lat: 18.9532,
+                    lng: 72.9440,
+                    phone: "022-2724-8900",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Port Medical Store",
+                    lat: 18.9542,
+                    lng: 72.9452,
+                    phone: "",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Port Branch",
+                    lat: 18.9545,
+                    lng: 72.9448,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Nhava Sheva Ferry",
+                    lat: 18.9540,
+                    lng: 72.9450,
+                    phone: "022-2756-0000",
+                    open: "24/7"
+                }, {
+                    type: "transport",
+                    name: "JNPT Gate Bus",
+                    lat: 18.9538,
+                    lng: 72.9455,
+                    phone: "",
+                    open: "24/7"
+                }, ]
+            },
+            "Uran": {
+                center: [18.8903, 72.9350],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Uran Rural Hospital",
+                    lat: 18.8912,
+                    lng: 72.9358,
+                    phone: "022-2722-1111",
+                    open: "Open"
+                }, {
+                    type: "police",
+                    name: "Uran Police Station",
+                    lat: 18.8895,
+                    lng: 72.9342,
+                    phone: "022-2722-8900",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Jan Aushadhi Uran",
+                    lat: 18.8905,
+                    lng: 72.9352,
+                    phone: "1800-180-8080",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Uran",
+                    lat: 18.8900,
+                    lng: 72.9348,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Uran Bus Stand",
+                    lat: 18.8903,
+                    lng: 72.9350,
+                    phone: "",
+                    open: "24/7"
+                }, ]
+            },
+            "Pen": {
+                center: [18.7340, 73.0958],
+                zoom: 14,
+                zone: "SAFE",
+                services: [{
+                    type: "hospital",
+                    name: "Pen Rural Hospital",
+                    lat: 18.7350,
+                    lng: 73.0968,
+                    phone: "02143-222111",
+                    open: "24/7"
+                }, {
+                    type: "police",
+                    name: "Pen Police Station",
+                    lat: 18.7332,
+                    lng: 73.0950,
+                    phone: "02143-222200",
+                    open: "24/7"
+                }, {
+                    type: "pharmacy",
+                    name: "Jan Aushadhi Pen",
+                    lat: 18.7342,
+                    lng: 73.0960,
+                    phone: "1800-180-8080",
+                    open: "Open"
+                }, {
+                    type: "bank",
+                    name: "SBI Pen Branch",
+                    lat: 18.7338,
+                    lng: 73.0955,
+                    phone: "1800-425-3800",
+                    open: "Open"
+                }, {
+                    type: "transport",
+                    name: "Pen Bus Stand",
+                    lat: 18.7340,
+                    lng: 73.0958,
+                    phone: "",
+                    open: "24/7"
+                }, ]
+            },
+        };
+
+        // ══════════ ICON CONFIG ══════════
+        const ICONS = {
+            hospital: {
+                emoji: '🏥',
+                bg: '#ff4757'
+            },
+            police: {
+                emoji: '👮',
+                bg: '#00c9ff'
+            },
+            pharmacy: {
+                emoji: '💊',
+                bg: '#2ed573'
+            },
+            bank: {
+                emoji: '🏦',
+                bg: '#f5a623'
+            },
+            atm: {
+                emoji: '💳',
+                bg: '#a29bfe'
+            },
+            hotel: {
+                emoji: '🏨',
+                bg: '#fd79a8'
+            },
+            restaurant: {
+                emoji: '🍽️',
+                bg: '#e17055'
+            },
+            transport: {
+                emoji: '🚌',
+                bg: '#74b9ff'
+            },
+        };
+
+        function makeIcon(type) {
+            const ic = ICONS[type] || {
+                emoji: '📍',
+                bg: '#888'
+            };
+            return L.divIcon({
+                className: '',
+                html: `<div style="width:30px;height:30px;border-radius:50%;background:${ic.bg};border:2px solid rgba(255,255,255,0.85);display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,0.55);">${ic.emoji}</div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15],
+                popupAnchor: [0, -18]
+            });
+        }
+
+        // ══════════ MAP INIT ══════════
+        const map = L.map('map', {
+            zoomControl: true,
+            attributionControl: true
+        }).setView([19.0330, 73.0297], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // City overview dots
+        const cityDotIcon = L.divIcon({
+            className: '',
+            html: '<div style="width:10px;height:10px;border-radius:50%;background:#f5a623;border:2px solid #0a0f1e;"></div>',
+            iconSize: [10, 10],
+            iconAnchor: [5, 5]
+        });
+        Object.entries(CITY_DATA).forEach(([name, data]) => {
+            L.marker(data.center, {
+                    icon: cityDotIcon
+                }).addTo(map)
+                .bindPopup(`<b>${name}</b><br><small style="color:#00c9ff">Click to load services</small>`)
+                .on('click', () => {
+                    document.getElementById('citySelect').value = name;
+                    onCityChange();
+                });
+        });
+
+        // User location icon
+        const userIcon = L.divIcon({
+            className: '',
+            html: '<div style="width:18px;height:18px;border-radius:50%;background:#00c9ff;border:3px solid #fff;box-shadow:0 0 0 8px rgba(0,201,255,0.25);"></div>',
+            iconSize: [18, 18],
+            iconAnchor: [9, 9]
+        });
+
+        let serviceMarkers = [],
+            userMarker = null,
+            lastPos = null,
+            lastMoveTime = Date.now(),
+            distressTriggered = false,
+            routingControl = null;
+        let activeFilters = new Set(['hospital', 'police', 'pharmacy', 'bank', 'hotel', 'restaurant', 'transport', 'atm']);
+
+        // ══════════ CITY CHANGE ══════════
+        function onCityChange() {
+            const cityName = document.getElementById('citySelect').value;
+            if (!cityName || !CITY_DATA[cityName]) return;
+            const city = CITY_DATA[cityName];
+
+            map.flyTo(city.center, city.zoom, {
+                duration: 1.4
+            });
+
+            // Banner
+            const banner = document.getElementById('cityBanner');
+            banner.textContent = `📍 ${cityName}`;
+            banner.style.display = 'block';
+            setTimeout(() => banner.style.display = 'none', 3000);
+
+            // Clear old markers
+            serviceMarkers.forEach(m => map.removeLayer(m));
+            serviceMarkers = [];
+
+            // Zone circle
+            const zc = {
+                SAFE: '#2ed573',
+                CAUTION: '#f5a623',
+                HIGH_RISK: '#ff4757'
+            }[city.zone] || '#2ed573';
+            const circ = L.circle(city.center, {
+                radius: 1800,
+                color: zc,
+                fillColor: zc,
+                fillOpacity: 0.06,
+                weight: 1.5
+            }).addTo(map);
+            serviceMarkers.push(circ);
+
+            // Service markers
+            city.services.forEach(svc => {
+                        if (!activeFilters.has(svc.type)) return;
+                        const ic = ICONS[svc.type] || {
+                            emoji: '📍'
+                        };
+                        const m = L.marker([svc.lat, svc.lng], {
+                                icon: makeIcon(svc.type)
+                            }).addTo(map).bindPopup(`
+      <div style="min-width:185px">
+        <b style="font-size:.9rem">${ic.emoji} ${svc.name}</b><br>
+        <span style="font-size:.72rem;color:#7a8aa0">${svc.type.toUpperCase()}</span><br>
+        ${svc.phone?`<div style="margin-top:6px"><a href="tel:${svc.phone}" style="color:#00c9ff;font-size:.8rem">📞 ${svc.phone}</a></div>`:''}
+        <div style="margin-top:5px">
+          <span style="font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:3px;background:${svc.open==='24/7'?'rgba(0,201,255,.15)':'rgba(46,213,115,.15)'};color:${svc.open==='24/7'?'#00c9ff':'#2ed573'}">${svc.open}</span>
+        </div>
+        <div style="margin-top:8px">
+          <a href="https://www.google.com/maps?q=${svc.lat},${svc.lng}" target="_blank" style="font-size:.76rem;color:#00c9ff;text-decoration:none">🗺️ Open in Google Maps →</a>
+        </div>
+      </div>
+    `);
+    serviceMarkers.push(m);
+  });
+
+  // Sidebar list
+  renderSidebarServices(cityName,city);
+
+  // Info
+  const total=city.services.length;
+  document.getElementById('cityServicesCount').textContent=`${total} services loaded`;
+  document.getElementById('cityZoneInfo').textContent=city.zone==='SAFE'?'✅ Safe':city.zone==='CAUTION'?'⚠️ Caution':'🚫 High-Risk';
+  document.getElementById('origin').value=`${cityName}, Navi Mumbai`;
+}
+
+function renderSidebarServices(cityName,city){
+  document.getElementById('svcListTitle').textContent=`📌 ${cityName} Services`;
+  const list=document.getElementById('svcList');
+  list.innerHTML='';
+  const filtered=city.services.filter(s=>activeFilters.has(s.type));
+  if(!filtered.length){list.innerHTML='<div style="font-size:.76rem;color:var(--muted);padding:12px;text-align:center">No services match filters</div>';return;}
+  filtered.forEach(svc=>{
+    const ic=ICONS[svc.type]||{emoji:'📍'};
+    const stCls=svc.open==='24/7'?'st-247':svc.open==='Open'?'st-open':'st-closed';
+    const div=document.createElement('div');div.className='ni';
+    div.innerHTML=`<span class="ni-icon">${ic.emoji}</span><div style="flex:1;min-width:0"><div class="ni-name">${svc.name}</div><div class="ni-dist">${svc.type.toUpperCase()}${svc.phone?' · '+svc.phone:''}</div></div><span class="ni-st ${stCls}">${svc.open}</span>`;
+    div.onclick=()=>{
+      map.flyTo([svc.lat,svc.lng],17,{duration:1.0});
+      serviceMarkers.forEach(m=>{if(m.getLatLng&&m.getLatLng().lat.toFixed(5)===svc.lat.toFixed(5))m.openPopup();});
+    };
+    list.appendChild(div);
+  });
+}
+
+function toggleFilter(type,btn){
+  btn.classList.toggle('active');
+  activeFilters.has(type)?activeFilters.delete(type):activeFilters.add(type);
+  const cn=document.getElementById('citySelect').value;
+  if(cn&&CITY_DATA[cn]){serviceMarkers.forEach(m=>map.removeLayer(m));serviceMarkers=[];onCityChange();}
+}
+
+// ══════════ GPS — LIVE PULSING MARKER ══════════
+// Build live pulsing user icon
+const liveUserIcon = L.divIcon({
+  className: '',
+  html: `<div class="live-marker-outer"><div class="live-marker-pulse"></div><div class="live-marker-inner"></div></div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+  popupAnchor: [0, -12]
+});
+
+let accuracyCircle = null;
+
+function updateLocation(lat, lng, accuracy) {
+  // Update or create pulsing marker
+  if (userMarker) {
+    userMarker.setLatLng([lat, lng]);
+  } else {
+    userMarker = L.marker([lat, lng], { icon: liveUserIcon, zIndexOffset: 1000 })
+      .addTo(map);
+  }
+
+  // Update accuracy circle
+  const acc = accuracy || 50;
+  if (accuracyCircle) {
+    accuracyCircle.setLatLng([lat, lng]).setRadius(acc);
+  } else {
+    accuracyCircle = L.circle([lat, lng], {
+      radius: acc,
+      color: '#00c9ff',
+      fillColor: '#00c9ff',
+      fillOpacity: 0.08,
+      weight: 1,
+      dashArray: '4 4'
+    }).addTo(map);
+  }
+
+  // Update popup with user name if logged in
+  const u = JSON.parse(localStorage.getItem('safetrail_user') || '{}');
+  const popupHtml = u.name
+    ? `<div style="min-width:160px"><b style="color:#00c9ff">📍 ${u.name}</b><br>
+       <span style="font-size:.75rem;color:#7a8aa0">Live Location</span><br>
+       <span style="font-size:.72rem">${lat.toFixed(5)}, ${lng.toFixed(5)}</span><br>
+       <div style="margin-top:6px">
+         ${u.emergency_contact ? `<a href="tel:${u.emergency_contact}" style="color:#2ed573;font-size:.75rem">📞 Call Emergency: ${u.emergency_contact}</a>` : ''}
+       </div></div>`
+    : `<b style="color:#00c9ff">📍 You are here</b><br><span style="font-size:.75rem">${lat.toFixed(5)}, ${lng.toFixed(5)}</span>`;
+  userMarker.bindPopup(popupHtml);
+
+  // Detect nearest city
+  let detectedCity = 'Navi Mumbai', minD = Infinity;
+  Object.entries(CITY_DATA).forEach(([n, d]) => {
+    const dd = Math.sqrt(Math.pow(lat - d.center[0], 2) + Math.pow(lng - d.center[1], 2));
+    if (dd < minD) { minD = dd; detectedCity = n; }
+  });
+
+  // Update sidebar GPS status
+  document.getElementById('locLbl').textContent = 'LOCATION ACTIVE ●';
+  document.getElementById('locLbl').style.color = 'var(--safe)';
+  document.getElementById('locInfo').innerHTML =
+    `Lat: <strong>${lat.toFixed(5)}</strong> Lng: <strong>${lng.toFixed(5)}</strong><br>
+     Accuracy: <strong style="color:var(--accent)">±${Math.round(acc)}m</strong><br>
+     Zone: <strong style="color:var(--safe)">Safe ✓</strong><br>
+     Nearest: <strong id="userCityDetected">${detectedCity}</strong>`;
+
+  // Auto-select nearest city on first fix
+  if (!document.getElementById('citySelect').value) {
+    document.getElementById('citySelect').value = detectedCity;
+    onCityChange();
+  }
+
+  // Update live location text in profile card
+  updateLiveLocText(lat, lng);
+
+  // Movement detection for distress
+  if (lastPos) {
+    const d = Math.sqrt(Math.pow(lat - lastPos[0], 2) + Math.pow(lng - lastPos[1], 2));
+    if (d > 0.00005) lastMoveTime = Date.now();
+  }
+  lastPos = [lat, lng];
+}
+// ── FIX #2: Geolocation with proper permission handling ──────────
+(function startGeolocation() {
+  const locLbl  = document.getElementById('locLbl');
+  const locInfo = document.getElementById('locInfo');
+
+  function onGeoError(err) {
+    let reason = 'Location unavailable';
+    if (err && err.code === 1) reason = 'Location permission denied by user';
+    else if (err && err.code === 2) reason = 'Position unavailable (GPS off?)';
+    else if (err && err.code === 3) reason = 'Location request timed out';
+    if (locLbl)  { locLbl.textContent = 'LOCATION: ' + reason; locLbl.style.color = 'var(--gold)'; }
+    if (locInfo) locInfo.innerHTML = `<span style="color:var(--gold)">⚠️ ${reason}.<br>Showing default map centre.</span>`;
+    updateLocation(19.0330, 73.0297); // fallback to Navi Mumbai centre
+  }
+
+  if (!navigator.geolocation) {
+    onGeoError({ code: 0 });
+    return;
+  }
+
+  // First: get position immediately
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      updateLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+      // Center map on first fix
+      map.flyTo([pos.coords.latitude, pos.coords.longitude], 15, { duration: 1.5 });
+    },
+    onGeoError,
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
+
+  // Watch for live continuous updates
+  navigator.geolocation.watchPosition(
+    pos => {
+      updateLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+      // Save live location to DB
+      const storedUser = JSON.parse(localStorage.getItem('safetrail_user') || '{}');
+      if (storedUser.user_id) {
+        fetch(`${BASE_URL}/api/location/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id:  storedUser.user_id,
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude
+          })
+        }).catch(() => {});
+      }
+    },
+    onGeoError,
+    { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
+  );
+})();
+
+// ══════════ USER PROFILE CARD ══════════
+const storedUser = JSON.parse(localStorage.getItem('safetrail_user') || '{}');
+
+function loadUserProfileCard() {
+  const card = document.getElementById('userProfileCard');
+  if (!storedUser || !storedUser.name) {
+    card.innerHTML = `<div class="not-logged">Not logged in. <a href="index.html">Register / Login →</a></div>`;
+    return;
+  }
+  const initials = storedUser.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  card.innerHTML = `
+    <div class="user-card">
+      <div class="user-card-header">
+        <div class="user-avatar">${initials}</div>
+        <div>
+          <div class="user-name-txt">👤 ${storedUser.name}</div>
+          <div class="user-city-txt">📍 ${storedUser.current_city || storedUser.city || 'Navi Mumbai'}</div>
+        </div>
+      </div>
+      ${storedUser.phone ? `<div class="user-detail-row">📞 <strong>${storedUser.phone}</strong></div>` : ''}
+      ${storedUser.emergency_contact ? `<div class="user-detail-row">🆘 Emergency: <strong>${storedUser.emergency_contact}</strong></div>` : ''}
+      ${storedUser.medical_info || storedUser.medical ? `<div class="user-detail-row">🏥 Medical: <strong>${storedUser.medical_info || storedUser.medical}</strong></div>` : ''}
+      <div style="margin-top:8px;padding:6px 8px;background:rgba(0,201,255,0.06);border-radius:7px;font-size:.72rem;color:var(--muted)">
+        <span id="liveLocTxt">📡 Fetching live location...</span>
+      </div>
+      <div class="user-actions">
+        ${storedUser.emergency_contact ? `<button class="ub ub-call" onclick="callEmergency()">📞 Call</button>` : ''}
+        ${storedUser.emergency_contact ? `<button class="ub ub-msg"  onclick="msgEmergency()">💬 SMS</button>` : ''}
+        <button class="ub ub-sos" onclick="location.href='sos.html'">🆘 SOS</button>
+      </div>
+    </div>`;
+}
+
+function callEmergency() {
+  if (storedUser.emergency_contact) {
+    window.open('tel:' + storedUser.emergency_contact);
+  }
+}
+
+function msgEmergency() {
+  if (storedUser.emergency_contact) {
+    const lat = lastPos ? lastPos[0].toFixed(5) : '?';
+    const lng = lastPos ? lastPos[1].toFixed(5) : '?';
+    const msg = encodeURIComponent(`🆘 SafeTrail Alert: ${storedUser.name || 'Tourist'} needs help! Live location: https://maps.google.com/?q=${lat},${lng}`);
+    window.open(`sms:${storedUser.emergency_contact}?body=${msg}`);
+  }
+}
+
+// Update live location text in card
+function updateLiveLocText(lat, lng) {
+  const el = document.getElementById('liveLocTxt');
+  if (el) el.innerHTML = `📡 Live: <strong style="color:var(--safe)">${lat.toFixed(5)}, ${lng.toFixed(5)}</strong> ✓`;
+}
+
+loadUserProfileCard();
+
+// ══════════ AI DISTRESS ══════════
+setInterval(()=>{
+  const stillSec=Math.floor((Date.now()-lastMoveTime)/1000);
+  const level=Math.min(100,Math.floor(stillSec/0.5));
+  const fill=document.getElementById('distressFill'),label=document.getElementById('distressLabel'),
+        aiDot=document.getElementById('aiDot'),aiStatus=document.getElementById('aiStatus'),
+        box=document.getElementById('distressBox'),timer=document.getElementById('distressTimer');
+  fill.style.width=level+'%';
+  timer.textContent=stillSec>2?`Stationary: ${stillSec}s`:'';
+  if(level<35){fill.className='d-fill';label.textContent='Distress: Normal';aiStatus.textContent='Movement OK ✓';aiDot.style.background='var(--safe)';box.className='distress-box';distressTriggered=false;}
+  else if(level<70){fill.className='d-fill warn';label.textContent=`Distress: Moderate (${level}%)`;aiStatus.textContent='⚠️ Unusual stillness';aiDot.style.background='var(--gold)';}
+  else{fill.className='d-fill danger';label.textContent=`🚨 HIGH DISTRESS (${level}%)`;aiStatus.textContent='🚨 Auto-alerting!';aiDot.style.background='var(--danger)';box.className='distress-box alert';if(!distressTriggered){distressTriggered=true;triggerAutoAlert();}}
+},1000);
+
+function triggerAutoAlert(){
+  const popup=document.getElementById('distressPopup');popup.style.display='block';setTimeout(()=>popup.style.display='none',8000);
+  fetch(`${BASE_URL}/api/sos/trigger`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:storedUser.name||'Unknown',phone:storedUser.phone||'',emergency_contact:storedUser.emergency_contact||'',emergency_email:storedUser.emergency_email||'',latitude:lastPos?lastPos[0]:19.0330,longitude:lastPos?lastPos[1]:73.0297,type:'AUTO_DISTRESS',timestamp:new Date().toISOString()})}).catch(()=>{});
+  if(storedUser.emergency_contact){setTimeout(()=>{if(confirm(`🚨 DISTRESS!\nCall ${storedUser.emergency_contact}?`))window.open(`tel:${storedUser.emergency_contact}`);},2000);}
+}
+
+// ══════════ ROUTE ══════════
+function getRoute(){
+  const origin=document.getElementById('origin').value.trim(),dest=document.getElementById('dest').value.trim();
+  if(!dest){alert('Please enter a destination');return;}
+  if(routingControl)map.removeControl(routingControl);
+  const geo=q=>fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`).then(r=>r.json());
+  Promise.all([geo(origin),geo(dest)]).then(([o,d])=>{
+    if(!o.length||!d.length){alert('Could not find locations');return;}
+    routingControl=L.Routing.control({waypoints:[L.latLng(+o[0].lat,+o[0].lon),L.latLng(+d[0].lat,+d[0].lon)],routeWhileDragging:false,lineOptions:{styles:[{color:'#00c9ff',opacity:.9,weight:4}]},createMarker:()=>null,show:false,addWaypoints:false,fitSelectedRoutes:true}).addTo(map);
+  });
+}
+
+function trackPhone(){
+  const ph=document.getElementById('trackPh').value.trim(),res=document.getElementById('trackRes');
+  if(!ph)return;
+  res.style.display='block';res.textContent='🔍 Locating...';
+  setTimeout(()=>{res.innerHTML=`📍 <strong>Navi Mumbai, MH</strong><br>Network: Jio/Airtel<br>Last seen: ${new Date().toLocaleTimeString()}<br><small>Accuracy: ~2km</small>`;},1800);
+}
+    </script>
+</body>
+
+</html>
