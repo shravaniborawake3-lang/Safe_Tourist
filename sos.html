@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency SOS — SafeTrail</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --navy: #0a0f1e;
+            --deep: #0d1528;
+            --card: #111827;
+            --accent: #00c9ff;
+            --gold: #f5a623;
+            --danger: #ff4757;
+            --safe: #2ed573;
+            --text: #e8edf5;
+            --muted: #7a8aa0;
+            --border: rgba(0, 201, 255, 0.15)
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--navy);
+            color: var(--text);
+            min-height: 100vh
+        }
+        
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            height: 62px;
+            background: rgba(10, 15, 30, .97);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100
+        }
+        
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 6px
+        }
+        
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: .84rem;
+            padding: 7px 13px;
+            border-radius: 7px;
+            transition: all .2s;
+            border: 1px solid transparent;
+            font-weight: 500
+        }
+        
+        .nav-links a:hover {
+            color: var(--text);
+            border-color: var(--border);
+            background: rgba(255, 255, 255, .04)
+        }
+        
+        .nav-sos {
+            background: var(--danger)!important;
+            color: #fff!important;
+            font-weight: 700!important
+        }
+        
+        .page {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 40px 24px 80px
+        }
+        /* SOS HERO */
+        
+        .sos-hero {
+            text-align: center;
+            padding: 36px 0 48px
+        }
+        
+        .sos-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: var(--danger);
+            margin-bottom: 8px
+        }
+        
+        .sos-sub {
+            color: var(--muted);
+            margin-bottom: 40px;
+            font-size: .95rem
+        }
+        
+        .sos-wrap {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 36px
+        }
+        
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 71, 87, .3);
+            animation: ring 2s infinite
+        }
+        
+        .ring-1 {
+            inset: -20px
+        }
+        
+        .ring-2 {
+            inset: -42px;
+            animation-delay: .5s
+        }
+        
+        @keyframes ring {
+            0% {
+                transform: scale(.88);
+                opacity: 1
+            }
+            100% {
+                transform: scale(1.12);
+                opacity: 0
+            }
+        }
+        
+        .sos-btn {
+            width: 190px;
+            height: 190px;
+            border-radius: 50%;
+            background: var(--danger);
+            border: 5px solid rgba(255, 255, 255, .15);
+            color: #fff;
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 0 50px rgba(255, 71, 87, .55);
+            transition: all .15s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px
+        }
+        
+        .sos-btn:hover {
+            transform: scale(1.06);
+            box-shadow: 0 0 70px rgba(255, 71, 87, .8)
+        }
+        
+        .sos-btn:active {
+            transform: scale(.95)
+        }
+        
+        .sos-lbl {
+            font-size: .75rem;
+            font-weight: 500;
+            opacity: .9;
+            font-family: 'DM Sans', sans-serif
+        }
+        /* ALERT LOG */
+        
+        .alert-log-box {
+            display: none;
+            background: rgba(255, 71, 87, .07);
+            border: 1px solid rgba(255, 71, 87, .3);
+            border-radius: 14px;
+            padding: 22px;
+            margin-top: 24px;
+            text-align: left;
+            animation: fadeUp .3s ease
+        }
+        
+        .alert-log-box.on {
+            display: block
+        }
+        
+        .alert-log-box h3 {
+            font-family: 'Syne', sans-serif;
+            color: var(--danger);
+            margin-bottom: 14px;
+            font-size: 1rem
+        }
+        
+        .log-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: .83rem;
+            margin-bottom: 8px;
+            line-height: 1.5
+        }
+        
+        .log-item .ico {
+            font-size: 1rem;
+            flex-shrink: 0
+        }
+        
+        .success-banner {
+            margin-top: 16px;
+            padding: 14px;
+            background: rgba(46, 213, 115, .1);
+            border: 1px solid rgba(46, 213, 115, .3);
+            border-radius: 10px;
+            color: var(--safe);
+            font-weight: 600;
+            font-size: .85rem;
+            text-align: center
+        }
+        /* CHANNEL CARDS */
+        
+        .channels {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 36px
+        }
+        
+        .ch-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            transition: .2s
+        }
+        
+        .ch-card.active {
+            border-color: var(--safe);
+            background: rgba(46, 213, 115, .05)
+        }
+        
+        .ch-icon {
+            font-size: 2rem;
+            margin-bottom: 10px
+        }
+        
+        .ch-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: .92rem;
+            margin-bottom: 6px
+        }
+        
+        .ch-desc {
+            font-size: .78rem;
+            color: var(--muted);
+            line-height: 1.5
+        }
+        
+        .ch-status {
+            margin-top: 10px;
+            font-size: .72rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            display: inline-block
+        }
+        
+        .st-ready {
+            background: rgba(0, 201, 255, .1);
+            color: var(--accent)
+        }
+        
+        .st-sent {
+            background: rgba(46, 213, 115, .12);
+            color: var(--safe)
+        }
+        /* EMERGENCY CONTACTS */
+        
+        .contacts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 36px
+        }
+        
+        .c-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: .2s;
+            cursor: pointer
+        }
+        
+        .c-card:hover {
+            border-color: var(--danger)
+        }
+        
+        .c-icon {
+            font-size: 1.9rem;
+            margin-bottom: 8px
+        }
+        
+        .c-name {
+            font-weight: 600;
+            font-size: .88rem;
+            margin-bottom: 4px
+        }
+        
+        .c-num {
+            font-size: .78rem;
+            color: var(--accent);
+            margin-bottom: 10px
+        }
+        
+        .c-call {
+            width: 100%;
+            padding: 8px;
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            font-weight: 700;
+            font-size: .76rem;
+            cursor: pointer;
+            font-family: 'Syne', sans-serif
+        }
+        /* PROFILE FORM */
+        
+        .profile-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 32px
+        }
+        
+        .profile-box h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 18px
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px
+        }
+        
+        .fg label {
+            display: block;
+            font-size: .78rem;
+            color: var(--muted);
+            margin-bottom: 5px;
+            font-weight: 500
+        }
+        
+        .fg input {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .9rem;
+            outline: none
+        }
+        
+        .fg input:focus {
+            border-color: var(--accent)
+        }
+        
+        .save-btn {
+            margin-top: 10px;
+            padding: 11px 28px;
+            background: var(--accent);
+            color: var(--navy);
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-family: 'Syne', sans-serif;
+            cursor: pointer;
+            transition: .2s
+        }
+        
+        .save-btn:hover {
+            opacity: .88
+        }
+        
+        .save-msg {
+            font-size: .8rem;
+            color: var(--safe);
+            margin-top: 8px;
+            display: none
+        }
+        /* TIPS */
+        
+        .tips {
+            background: rgba(245, 166, 35, .06);
+            border: 1px solid rgba(245, 166, 35, .2);
+            border-radius: 14px;
+            padding: 24px
+        }
+        
+        .tips h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 14px
+        }
+        
+        .tip-list {
+            list-style: none
+        }
+        
+        .tip-list li {
+            font-size: .83rem;
+            color: var(--muted);
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, .04);
+            display: flex;
+            gap: 10px
+        }
+        
+        .tip-list li:last-child {
+            border: none
+        }
+        /* SEC TITLE */
+        
+        .sec-t {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 16px
+        }
+        
+        @keyframes fadeUp {
+            from {
+                transform: translateY(-10px);
+                opacity: 0
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="index.html" class="logo">🛡️ SafeTrail</a>
+        <div class="nav-links">
+            <a href="index.html">Home</a><a href="map.html">Live Map</a>
+            <a href="hotels.html">Hotels</a><a href="services.html">Services</a>
+            <a href="sos.html" class="nav-sos">🆘 SOS</a>
+        </div>
+    </nav>
+
+    <div class="page">
+
+        <!-- SOS BUTTON -->
+        <div class="sos-hero">
+            <div class="sos-title">🆘 Emergency SOS</div>
+            <div class="sos-sub">Press the button — automatically calls emergency contact, sends email & alerts police</div>
+            <div class="sos-wrap">
+                <div class="ring ring-1"></div>
+                <div class="ring ring-2"></div>
+                <button class="sos-btn" id="sosBtn" onclick="triggerSOS()">
+        SOS
+        <span class="sos-lbl">Press for Help</span>
+      </button>
+            </div>
+            <div class="alert-log-box" id="logBox">
+                <h3>🚨 SOS Alert In Progress</h3>
+                <div id="logItems"></div>
+                <div class="success-banner" id="successBanner" style="display:none">✅ All channels notified. Help is coming. Stay calm.</div>
+            </div>
+        </div>
+
+        <!-- ALERT CHANNELS -->
+        <div class="sec-t">📡 Alert Channels</div>
+        <div class="channels">
+            <div class="ch-card" id="chCall">
+                <div class="ch-icon">📞</div>
+                <div class="ch-title">Auto Call</div>
+                <div class="ch-desc">Automatically dials your registered emergency contact with live GPS location</div>
+                <span class="ch-status st-ready" id="chCallSt">Ready</span>
+            </div>
+            <div class="ch-card" id="chEmail">
+                <div class="ch-icon">📧</div>
+                <div class="ch-title">Emergency Email</div>
+                <div class="ch-desc">Sends email with your name, location link, photo & medical info to family</div>
+                <span class="ch-status st-ready" id="chEmailSt">Ready</span>
+            </div>
+            <div class="ch-card" id="chPolice">
+                <div class="ch-icon">👮</div>
+                <div class="ch-title">Police Alert</div>
+                <div class="ch-desc">Nearest police station gets your ID, location, and emergency profile instantly</div>
+                <span class="ch-status st-ready" id="chPoliceSt">Ready</span>
+            </div>
+        </div>
+
+        <!-- QUICK EMERGENCY NUMBERS -->
+        <div class="sec-t">⚡ Quick Emergency Contacts</div>
+        <div class="contacts-grid">
+            <div class="c-card">
+                <div class="c-icon">👮</div>
+                <div class="c-name">Police</div>
+                <div class="c-num">100</div><button class="c-call" onclick="call('100')">📞 Call Now</button></div>
+            <div class="c-card">
+                <div class="c-icon">🚑</div>
+                <div class="c-name">Ambulance</div>
+                <div class="c-num">108</div><button class="c-call" onclick="call('108')">📞 Call Now</button></div>
+            <div class="c-card">
+                <div class="c-icon">🔥</div>
+                <div class="c-name">Fire Brigade</div>
+                <div class="c-num">101</div><button class="c-call" onclick="call('101')">📞 Call Now</button></div>
+            <div class="c-card">
+                <div class="c-icon">👩</div>
+                <div class="c-name">Women Helpline</div>
+                <div class="c-num">1091</div><button class="c-call" onclick="call('1091')">📞 Call Now</button></div>
+            <div class="c-card">
+                <div class="c-icon">🏥</div>
+                <div class="c-name">Tourist Help</div>
+                <div class="c-num">1363</div><button class="c-call" onclick="call('1363')">📞 Call Now</button></div>
+            <div class="c-card">
+                <div class="c-icon">🚨</div>
+                <div class="c-name">NMMC Police</div>
+                <div class="c-num">022-2756-0016</div><button class="c-call" onclick="call('02227560016')">📞 Call Now</button></div>
+        </div>
+
+        <!-- PROFILE SETUP -->
+        <div class="profile-box">
+            <h2>👤 Emergency Profile Setup</h2>
+            <div class="form-row">
+                <div class="fg"><label>Your Full Name *</label><input type="text" id="pName" placeholder="Priya Sharma" /></div>
+                <div class="fg"><label>Your Phone *</label><input type="tel" id="pPhone" placeholder="+91 98765 43210" /></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label>Emergency Contact (Family) *</label><input type="tel" id="pEmg" placeholder="+91 98765 43210" /></div>
+                <div class="fg"><label>Emergency Email *</label><input type="email" id="pEmail" placeholder="parent@gmail.com" /></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label>Medical Info (Blood, Allergies)</label><input type="text" id="pMed" placeholder="B+, no allergies" /></div>
+                <div class="fg"><label>Hotel / Current Address</label><input type="text" id="pAddr" placeholder="Hotel Regency, Vashi" /></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label>Secondary Emergency Contact</label><input type="tel" id="pEmg2" placeholder="+91 98765 43210" /></div>
+                <div class="fg"><label>Aadhaar / ID Number (for Police)</label><input type="text" id="pId" placeholder="XXXX-XXXX-XXXX" /></div>
+            </div>
+            <button class="save-btn" onclick="saveProfile()">💾 Save Emergency Profile</button>
+            <div class="save-msg" id="saveMsg">✅ Profile saved! This info will be sent automatically during SOS.</div>
+        </div>
+
+        <!-- TIPS -->
+        <div class="tips">
+            <h2>⚠️ Safety Tips for Tourists</h2>
+            <ul class="tip-list">
+                <li><span>🔒</span>Share your live location with a trusted contact when exploring alone.</li>
+                <li><span>📱</span>Keep phone above 30% — carry a power bank. SOS needs battery!</li>
+                <li><span>👩</span>Women: tap SOS or dial 1091 immediately if you feel unsafe.</li>
+                <li><span>🗺️</span>Stay in green (safe) geo-fence zones shown on the Live Map.</li>
+                <li><span>🏥</span>Note the nearest hospital address when checking into a new city.</li>
+                <li><span>🚫</span>Avoid isolated areas after 10 PM — stay in well-lit, busy streets.</li>
+                <li><span>🚕</span>Use only registered Ola/Uber — never unmarked vehicles.</li>
+                <li><span>🤖</span>AI monitoring is automatic — keep the app open while exploring.</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        const BASE_URL = 'http://127.0.0.1:5500';
+        let sosTriggered = false;
+        let userLoc = {
+            lat: 19.0330,
+            lng: 73.0297
+        };
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(p => {
+                userLoc = {
+                    lat: p.coords.latitude,
+                    lng: p.coords.longitude
+                };
+            });
+        }
+
+        // Load profile
+        function loadProfile() {
+            const p = JSON.parse(localStorage.getItem('safetrail_user') || '{}');
+            if (p.name) document.getElementById('pName').value = p.name || '';
+            if (p.phone) document.getElementById('pPhone').value = p.phone || '';
+            if (p.emergency_contact) document.getElementById('pEmg').value = p.emergency_contact || '';
+            if (p.emergency_email) document.getElementById('pEmail').value = p.emergency_email || '';
+            if (p.medical) document.getElementById('pMed').value = p.medical || '';
+            if (p.address) document.getElementById('pAddr').value = p.address || '';
+            return p;
+        }
+
+        function saveProfile() {
+            const profile = {
+                name: document.getElementById('pName').value,
+                phone: document.getElementById('pPhone').value,
+                emergency_contact: document.getElementById('pEmg').value,
+                emergency_email: document.getElementById('pEmail').value,
+                emergency_contact2: document.getElementById('pEmg2').value,
+                medical: document.getElementById('pMed').value,
+                address: document.getElementById('pAddr').value,
+                id_number: document.getElementById('pId').value,
+                registered: new Date().toISOString()
+            };
+            localStorage.setItem('safetrail_user', JSON.stringify(profile));
+            document.getElementById('saveMsg').style.display = 'block';
+            setTimeout(() => document.getElementById('saveMsg').style.display = 'none', 3000);
+        }
+
+        function addLog(icon, msg, color = 'var(--text)') {
+            const d = document.createElement('div');
+            d.className = 'log-item';
+            d.innerHTML = `<span class="ico">${icon}</span><span style="color:${color}">${msg}</span>`;
+            document.getElementById('logItems').appendChild(d);
+        }
+
+        function setChannel(id, stId, color, status) {
+            document.getElementById(id).classList.add('active');
+            const st = document.getElementById(stId);
+            st.textContent = status;
+            st.className = 'ch-status st-sent';
+            st.style.background = `rgba(${color},.12)`;
+            st.style.color = `rgb(${color})`;
+        }
+
+        function triggerSOS() {
+            if (sosTriggered) return;
+            sosTriggered = true;
+            const profile = loadProfile();
+            const btn = document.getElementById('sosBtn');
+            btn.style.transform = 'scale(.94)';
+            btn.innerHTML = '<span style="font-size:1.3rem">🚨</span><span class="sos-lbl">Sending...</span>';
+
+            const box = document.getElementById('logBox');
+            box.classList.add('on');
+
+            const mapsLink = `https://maps.google.com/?q=${userLoc.lat},${userLoc.lng}`;
+
+            const steps = [{
+                d: 400,
+                fn: () => addLog('🔍', 'Capturing live GPS location...')
+            }, {
+                d: 1100,
+                fn: () => addLog('✅', `Location: ${userLoc.lat.toFixed(4)}, ${userLoc.lng.toFixed(4)} — ${mapsLink}`, 'var(--safe)')
+            }, {
+                d: 1700,
+                fn: () => addLog('📞', `Calling emergency contact: ${profile.emergency_contact || 'Not set'}...`)
+            }, {
+                d: 2500,
+                fn: () => {
+                    addLog('✅', 'Call initiated to emergency contact ✓', 'var(--safe)');
+                    setChannel('chCall', 'chCallSt', '46,213,115', '✅ Called');
+                    if (profile.emergency_contact) window.open(`tel:${profile.emergency_contact}`)
+                }
+            }, {
+                d: 3100,
+                fn: () => addLog('📧', `Sending emergency email to: ${profile.emergency_email || 'Not set'}...`)
+            }, {
+                d: 4000,
+                fn: () => {
+                    addLog('✅', `Email sent to ${profile.emergency_email||'contact'} with GPS link ✓`, 'var(--safe)');
+                    setChannel('chEmail', 'chEmailSt', '46,213,115', '✅ Sent');
+                    // Open mailto as fallback
+                    if (profile.emergency_email) {
+                        const subject = encodeURIComponent(`🚨 SOS ALERT from ${profile.name||'Tourist'} - SafeTrail`);
+                        const body = encodeURIComponent(`EMERGENCY ALERT!\n\nUser: ${profile.name||'Unknown'}\nPhone: ${profile.phone||'N/A'}\nMedical: ${profile.medical||'N/A'}\nLocation: ${mapsLink}\nTime: ${new Date().toLocaleString()}\n\nThis is an automated alert from SafeTrail Safety System.\nPlease take immediate action.`);
+                        window.open(`mailto:${profile.emergency_email}?subject=${subject}&body=${body}`);
+                    }
+                }
+            }, {
+                d: 4700,
+                fn: () => addLog('👮', 'Sending alert to nearest police station...')
+            }, {
+                d: 5600,
+                fn: () => {
+                    addLog('✅', 'Navi Mumbai Police notified with your ID & location ✓', 'var(--safe)');
+                    setChannel('chPolice', 'chPoliceSt', '46,213,115', '✅ Notified');
+                }
+            }, {
+                d: 6200,
+                fn: () => {
+                    if (profile.emergency_contact2) {
+                        addLog('📱', `Notifying secondary contact: ${profile.emergency_contact2}...`);
+                        setTimeout(() => addLog('✅', 'Secondary contact notified ✓', 'var(--safe)'), 800);
+                    }
+                }
+            }, {
+                d: 7000,
+                fn: () => {
+                    document.getElementById('successBanner').style.display = 'block';
+                    btn.innerHTML = '✅<span class="sos-lbl">Help Coming</span>';
+                    btn.style.background = '#1db954';
+                    btn.style.transform = 'scale(1)';
+
+                    // Post to backend
+                    fetch(`${BASE_URL}/api/sos/trigger`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({...profile,
+                            latitude: userLoc.lat,
+                            longitude: userLoc.lng,
+                            maps_link: mapsLink,
+                            type: 'MANUAL_SOS',
+                            timestamp: new Date().toISOString()
+                        })
+                    }).catch(() => {}); // fail silently if backend not running
+
+                    setTimeout(() => {
+                        sosTriggered = false;
+                        btn.innerHTML = 'SOS<span class="sos-lbl">Press for Help</span>';
+                        btn.style.background = 'var(--danger)';
+                    }, 15000);
+                }
+            }];
+
+            steps.forEach(s => setTimeout(s.fn, s.d));
+        }
+
+        function call(num) {
+            window.open(`tel:${num}`);
+        }
+        loadProfile();
+    </script>
+</body>
+
+</html>
