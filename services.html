@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services — SafeTrail</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --navy: #0a0f1e;
+            --deep: #0d1528;
+            --card: #111827;
+            --accent: #00c9ff;
+            --gold: #f5a623;
+            --danger: #ff4757;
+            --safe: #2ed573;
+            --text: #e8edf5;
+            --muted: #7a8aa0;
+            --border: rgba(0, 201, 255, 0.15)
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--navy);
+            color: var(--text);
+            min-height: 100vh
+        }
+        
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            height: 62px;
+            background: rgba(10, 15, 30, .97);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100
+        }
+        
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 6px
+        }
+        
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: .84rem;
+            padding: 7px 13px;
+            border-radius: 7px;
+            transition: all .2s;
+            border: 1px solid transparent;
+            font-weight: 500
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+            border-color: var(--border);
+            background: rgba(255, 255, 255, .04)
+        }
+        
+        .nav-sos {
+            background: var(--danger)!important;
+            color: #fff!important;
+            font-weight: 700!important
+        }
+        
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 80px
+        }
+        
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 6px
+        }
+        
+        .sub {
+            color: var(--muted);
+            margin-bottom: 36px
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 9px;
+            flex-wrap: wrap;
+            margin-bottom: 28px
+        }
+        
+        .tab {
+            padding: 9px 20px;
+            border-radius: 22px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--muted);
+            cursor: pointer;
+            font-size: .86rem;
+            transition: all .2s;
+            font-family: 'DM Sans', sans-serif
+        }
+        
+        .tab:hover,
+        .tab.active {
+            border-color: var(--accent);
+            color: var(--text);
+            background: rgba(0, 201, 255, .09)
+        }
+        
+        .sgrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
+            gap: 15px;
+            margin-bottom: 44px
+        }
+        
+        .scard {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            transition: all .2s;
+            cursor: pointer
+        }
+        
+        .scard:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px)
+        }
+        
+        .shdr {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            margin-bottom: 9px
+        }
+        
+        .sicon {
+            font-size: 1.75rem
+        }
+        
+        .sname {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: .93rem
+        }
+        
+        .stype {
+            font-size: .7rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .5px
+        }
+        
+        .sdesc {
+            font-size: .8rem;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 11px
+        }
+        
+        .sact {
+            display: flex;
+            gap: 7px
+        }
+        
+        .btn-go {
+            flex: 1;
+            padding: 8px;
+            background: var(--accent);
+            color: var(--navy);
+            border: none;
+            border-radius: 7px;
+            font-weight: 700;
+            font-size: .76rem;
+            cursor: pointer;
+            font-family: 'Syne', sans-serif;
+            transition: .2s
+        }
+        
+        .btn-go:hover {
+            opacity: .85
+        }
+        
+        .btn-info {
+            padding: 8px 12px;
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            font-size: .76rem;
+            cursor: pointer;
+            transition: .2s
+        }
+        
+        .btn-info:hover {
+            border-color: var(--accent)
+        }
+        
+        .badge {
+            display: inline-block;
+            font-size: .68rem;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 4px;
+            margin-bottom: 9px
+        }
+        
+        .b-open {
+            background: rgba(46, 213, 115, .12);
+            color: var(--safe)
+        }
+        
+        .b-24 {
+            background: rgba(0, 201, 255, .12);
+            color: var(--accent)
+        }
+        
+        .sec-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 16px
+        }
+        
+        .tracker-sec {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 36px
+        }
+        
+        .tracker-sec h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 8px
+        }
+        
+        .tracker-sec p {
+            color: var(--muted);
+            font-size: .86rem;
+            margin-bottom: 18px
+        }
+        
+        .t-form {
+            display: flex;
+            gap: 11px;
+            flex-wrap: wrap
+        }
+        
+        .t-form input {
+            flex: 1;
+            min-width: 200px;
+            padding: 11px 15px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .93rem;
+            outline: none
+        }
+        
+        .t-form input:focus {
+            border-color: var(--accent)
+        }
+        
+        .t-btn {
+            padding: 11px 26px;
+            background: var(--accent);
+            color: var(--navy);
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-family: 'Syne', sans-serif;
+            cursor: pointer
+        }
+        
+        .t-result {
+            margin-top: 14px;
+            padding: 14px;
+            background: rgba(0, 201, 255, .06);
+            border: 1px solid rgba(0, 201, 255, .2);
+            border-radius: 9px;
+            font-size: .85rem;
+            line-height: 1.8;
+            display: none
+        }
+        
+        .police-sec {
+            background: rgba(255, 71, 87, .05);
+            border: 1px solid rgba(255, 71, 87, .2);
+            border-radius: 16px;
+            padding: 26px
+        }
+        
+        .police-sec h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--danger);
+            margin-bottom: 14px
+        }
+        
+        .pgrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 11px
+        }
+        
+        .pcard {
+            background: var(--card);
+            border: 1px solid rgba(255, 71, 87, .18);
+            border-radius: 10px;
+            padding: 14px
+        }
+        
+        .pname {
+            font-weight: 600;
+            font-size: .86rem;
+            margin-bottom: 4px
+        }
+        
+        .paddr {
+            font-size: .76rem;
+            color: var(--muted);
+            margin-bottom: 7px
+        }
+        
+        .pnum {
+            font-size: .78rem;
+            color: var(--danger);
+            font-weight: 600;
+            margin-bottom: 8px
+        }
+        
+        .pcall {
+            width: 100%;
+            padding: 8px;
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: .76rem;
+            cursor: pointer;
+            font-family: 'Syne', sans-serif
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="index.html" class="logo">🛡️ SafeTrail</a>
+        <div class="nav-links">
+            <a href="index.html">Home</a><a href="map.html">Live Map</a>
+            <a href="hotels.html">Hotels</a><a href="services.html" class="active">Services</a>
+            <a href="sos.html" class="nav-sos">🆘 SOS</a>
+        </div>
+    </nav>
+    <div class="page">
+        <h1>🔍 Nearby Services</h1>
+        <p class="sub">Hospitals, police, pharmacies, banks, food & transport in Navi Mumbai</p>
+        <div class="tabs">
+            <button class="tab active" onclick="filter('all',this)">🗂️ All</button>
+            <button class="tab" onclick="filter('hospital',this)">🏥 Hospital</button>
+            <button class="tab" onclick="filter('police',this)">👮 Police</button>
+            <button class="tab" onclick="filter('pharmacy',this)">💊 Pharmacy</button>
+            <button class="tab" onclick="filter('bank',this)">🏦 Banks</button>
+            <button class="tab" onclick="filter('food',this)">🍽️ Food</button>
+            <button class="tab" onclick="filter('transport',this)">🚌 Transport</button>
+        </div>
+        <div class="sgrid" id="sgrid"></div>
+        <div class="tracker-sec" id="track">
+            <h2>📱 Phone Number Tracker</h2>
+            <p>Enter a phone number to get approximate location — for families tracking tourists. (Demo mode)</p>
+            <div class="t-form">
+                <input type="tel" id="tph" placeholder="Enter phone e.g. +91 98765 43210" />
+                <button class="t-btn" onclick="trackPhone()">🔍 Track</button>
+            </div>
+            <div class="t-result" id="tres"></div>
+        </div>
+        <div class="police-sec">
+            <h2>👮 Police Stations — Navi Mumbai</h2>
+            <div class="pgrid" id="pgrid"></div>
+        </div>
+    </div>
+    <script>
+        const BASE_URL = 'http://127.0.0.1:5500';
+
+        // Type metadata
+        const TYPE_META = {
+            hospital:   { icon: '🏥', label: 'Hospital' },
+            police:     { icon: '👮', label: 'Police' },
+            pharmacy:   { icon: '💊', label: 'Pharmacy' },
+            bank:       { icon: '🏦', label: 'Bank' },
+            atm:        { icon: '🏧', label: 'ATM' },
+            restaurant: { icon: '🍽️', label: 'Food' },
+            food:       { icon: '🍽️', label: 'Food' },
+            transport:  { icon: '🚌', label: 'Transport' },
+            hotel:      { icon: '🏨', label: 'Hotel' },
+        };
+
+        let allServices = [];
+        let currentFilter = 'all';
+
+        // Inject city dropdown dynamically
+        async function loadCities() {
+            try {
+                const res = await fetch(`${BASE_URL}/api/cities`);
+                const data = await res.json();
+                const sel = document.getElementById('citySelect');
+                if (sel) {
+                    data.cities.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c; opt.textContent = c;
+                        if (c === 'Vashi') opt.selected = true;
+                        sel.appendChild(opt);
+                    });
+                }
+                loadServices('Vashi');
+            } catch (e) {
+                console.warn('Backend offline, using static fallback', e);
+                loadStaticFallback();
+            }
+        }
+
+        async function loadServices(city) {
+            const g = document.getElementById('sgrid');
+            g.innerHTML = '<p style="color:var(--muted);padding:24px">⏳ Loading services...</p>';
+            try {
+                const res = await fetch(`${BASE_URL}/api/city/${encodeURIComponent(city)}/services`);
+                const data = await res.json();
+                allServices = data.services || [];
+                // Update police section from API data
+                const policeSvcs = allServices.filter(s => s.type === 'police');
+                renderPoliceFromAPI(policeSvcs);
+                renderFiltered(currentFilter);
+            } catch (e) {
+                console.warn('Could not load city services:', e);
+                g.innerHTML = '<p style="color:var(--gold);padding:24px">⚠️ Backend offline — showing static data</p>';
+                loadStaticFallback();
+            }
+        }
+
+        function renderFiltered(f) {
+            currentFilter = f;
+            const g = document.getElementById('sgrid');
+            g.innerHTML = '';
+            const list = f === 'all' ? allServices : allServices.filter(s => s.type === f || (f === 'food' && s.type === 'restaurant'));
+            if (!list.length) {
+                g.innerHTML = '<p style="color:var(--muted);padding:24px">No services of this type found in this city.</p>';
+                return;
+            }
+            list.forEach(s => {
+                const meta = TYPE_META[s.type] || { icon: '📍', label: s.type };
+                const c = document.createElement('div');
+                c.className = 'scard';
+                const badgeCls = (s.open === '24/7') ? 'b-24' : 'b-open';
+                const safeName = (s.name || '').replace(/'/g, "\\'");
+                c.innerHTML = `<div class="shdr"><span class="sicon">${meta.icon}</span><div><div class="sname">${s.name}</div><div class="stype">${meta.label.toUpperCase()}</div></div></div><span class="badge ${badgeCls}">${s.open || 'Open'}</span><div class="sdesc">${meta.label} · ${s.type}<br><small>📍 ${s.name}, Navi Mumbai</small></div><div class="sact"><button class="btn-go" onclick="openMap('${safeName} Navi Mumbai')">📍 Map</button>${s.phone ? `<button class="btn-info" onclick="window.open('tel:${s.phone}')">📞 Call</button>` : ''}</div>`;
+                g.appendChild(c);
+            });
+        }
+
+        function renderPoliceFromAPI(policeList) {
+            const g = document.getElementById('pgrid');
+            g.innerHTML = '';
+            policeList.forEach(p => {
+                const c = document.createElement('div');
+                c.className = 'pcard';
+                c.innerHTML = `<div class="pname">👮 ${p.name}</div><div class="paddr">📍 Navi Mumbai</div><div class="pnum">📞 ${p.phone || 'N/A'}</div>${p.phone ? `<button class="pcall" onclick="window.open('tel:${p.phone}')">Call Now</button>` : ''}`;
+                g.appendChild(c);
+            });
+        }
+
+        function filter(t, btn) {
+            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderFiltered(t);
+        }
+
+        function openMap(q) {
+            window.open(`https://www.google.com/maps/search/${encodeURIComponent(q)}`, '_blank');
+        }
+
+        function trackPhone() {
+            const ph = document.getElementById('tph').value.trim();
+            const res = document.getElementById('tres');
+            if (!ph) return alert('Enter a phone number');
+            res.style.display = 'block';
+            res.textContent = '🔍 Connecting to network...';
+            setTimeout(() => {
+                res.innerHTML = `<strong>📱 Device Located</strong><br>📞 <strong style="color:var(--accent)">${ph}</strong><br>📍 Area: <strong>Navi Mumbai, Maharashtra</strong><br>📡 Network: Reliance Jio / Airtel<br>🕐 Last seen: ${new Date().toLocaleTimeString()}<br><small style="color:var(--muted)">Accuracy: ~2km. Exact location needs law enforcement.</small>`;
+            }, 2000);
+        }
+
+        // Static fallback if backend offline
+        function loadStaticFallback() {
+            const svcs = [
+                { type:'hospital', name:'MGM Hospital Vashi', phone:'022-2765-7777', open:'24/7' },
+                { type:'hospital', name:'DY Patil Hospital Nerul', phone:'022-2771-5555', open:'24/7' },
+                { type:'hospital', name:'Fortis Hiranandani', phone:'022-6742-2000', open:'Open' },
+                { type:'pharmacy', name:'Apollo Pharmacy Vashi', phone:'1860-500-0101', open:'Open' },
+                { type:'pharmacy', name:'MedPlus Vashi', phone:'040-6715-1515', open:'Open' },
+                { type:'bank', name:'SBI Bank Vashi', phone:'1800-425-3800', open:'Open' },
+                { type:'bank', name:'HDFC Bank Vashi', phone:'1800-202-6161', open:'Open' },
+                { type:'police', name:'Vashi Police Station', phone:'022-2765-8200', open:'24/7' },
+                { type:'restaurant', name:'Mainland China Vashi', phone:'022-6741-9999', open:'Open' },
+                { type:'transport', name:'Vashi Railway Station', phone:'139', open:'24/7' },
+            ];
+            allServices = svcs;
+            const policeList = svcs.filter(s => s.type === 'police');
+            renderPoliceFromAPI(policeList);
+            renderFiltered(currentFilter);
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inject city selector above tabs
+            const page = document.querySelector('.page');
+            const tabs = document.querySelector('.tabs');
+            if (page && tabs) {
+                const div = document.createElement('div');
+                div.style = 'margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;';
+                div.innerHTML = `<label style="color:var(--muted);font-size:.85rem">City:</label><select id="citySelect" onchange="loadServices(this.value)" style="background:var(--card);color:var(--text);border:1px solid var(--border);padding:8px 14px;border-radius:8px;font-size:.9rem"></select>`;
+                page.insertBefore(div, tabs);
+            }
+            loadCities();
+        });
+
+        // Legacy static data kept as fallback (not used when backend is running)
+        const svcs = [{
+            t: 'hospital',
+            i: '🏥',
+            n: 'MGM Hospital Vashi',
+            d: 'Multi-specialty · 24/7 ICU & trauma.',
+            a: 'Sector 3, Vashi',
+            p: '022-2765-7777',
+            s: '24/7',
+            b: 'b-24'
+        }, {
+            t: 'hospital',
+            i: '🏥',
+            n: 'DY Patil Hospital Nerul',
+            d: 'Advanced oncology & cardiac care.',
+            a: 'Sector 7, Nerul',
+            p: '022-2771-5555',
+            s: '24/7',
+            b: 'b-24'
+        }, {
+            t: 'hospital',
+            i: '🏥',
+            n: 'Fortis Hiranandani',
+            d: 'Super-specialty — neurology, ortho.',
+            a: 'Mini Seashore Rd, Vashi',
+            p: '022-6742-2000',
+            s: 'Open',
+            b: 'b-open'
+        }, {
+            t: 'hospital',
+            i: '🏥',
+            n: 'Raigad District Hospital',
+            d: 'Govt. hospital. Free OPD. 24/7 emergency.',
+            a: 'Old NH-4, Panvel',
+            p: '022-2745-0101',
+            s: '24/7',
+            b: 'b-24'
+        }, {
+            t: 'pharmacy',
+            i: '💊',
+            n: 'Apollo Pharmacy Vashi',
+            d: 'Full-range medicines & health products.',
+            a: 'Sector 17, Vashi',
+            p: '1860-500-0101',
+            s: 'Open',
+            b: 'b-open'
+        }, {
+            t: 'pharmacy',
+            i: '💊',
+            n: 'MedPlus Nerul',
+            d: 'Discount pharmacy + online orders.',
+            a: 'Sector 1, Nerul',
+            p: '040-6715-1515',
+            s: 'Open',
+            b: 'b-open'
+        }, {
+            t: 'pharmacy',
+            i: '💊',
+            n: 'Jan Aushadhi Kharghar',
+            d: 'Govt medicines at 50–90% discount.',
+            a: 'Sector 12, Kharghar',
+            p: '1800-180-8080',
+            s: 'Open',
+            b: 'b-open'
+        }, {
+            t: 'bank',
+            i: '🏦',
+            n: 'SBI – Vashi Branch',
+            d: 'Full banking · ATM · forex · locker.',
+            a: 'Sector 30A, Vashi',
+            p: '1800-425-3800',
+            s: 'Open',
+            b: 'b-open'
+        }, {
+            t: 'bank',
+            i: '🏦',
+            n: 'HDFC Bank – Belapur',
+            d: 'Corporate banking · ATM · wealth mgmt.',
+            a: 'CBD Belapur, Sector 11',
+            p: '1800-202-6161',
+            s: 'Open',
+            b: 'b-open'
+        }, {
+            t: 'bank',
+            i: '🏦',
+            n: 'Bank of Maharashtra – Panvel',
+            d: 'Savings, loans & govt schemes.',
+            a: 'Station Rd, Old Panvel',
+            p: '1800-233-4526',
+            s: 'Open',
+            b: 'b-open'
+        }, {
+            t: 'food',
+            i: '🍽️',
+            n: 'Mainland China – Vashi',
+            d: 'Premium Chinese & Pan-Asian. Family dining.',
+            a: 'Inorbit Mall, Vashi',
+            p: '022-6741-9999',
+            s: 'Open',
+            b: 'b-open'
+        }, {
+            t: 'food',
+            i: '🍜',
+            n: 'Maratha Bhojanalaya',
+            d: 'Authentic Maharashtrian thali. Budget-friendly.',
+            a: 'Near Panvel Bus Stand',
+            p: '022-2741-3333',
+            s: 'Open',
+            b: 'b-open'
+        }, {
+            t: 'food',
+            i: '☕',
+            n: 'Café Coffee Day – Nerul',
+            d: 'Café · snacks · sandwiches. Student-friendly.',
+            a: 'Sector 21, Nerul',
+            p: '1860-500-2233',
+            s: 'Open',
+            b: 'b-open'
+        }, {
+            t: 'food',
+            i: '🍕',
+            n: "Domino's Pizza – Kharghar",
+            d: 'Fast delivery & dine-in. Online ordering.',
+            a: 'Central Park Rd, Kharghar',
+            p: '1800-208-1234',
+            s: 'Open',
+            b: 'b-open'
+        }, {
+            t: 'transport',
+            i: '🚉',
+            n: 'Vashi Railway Station',
+            d: 'Central line to CSMT & Panvel.',
+            a: 'Sector 17, Vashi',
+            p: '139',
+            s: 'Active',
+            b: 'b-24'
+        }, {
+            t: 'transport',
+            i: '🚌',
+            n: 'MSRTC Panvel Depot',
+            d: 'State buses to Pune, Konkan, MH.',
+            a: 'Old Panvel, NH-48',
+            p: '020-2612-5740',
+            s: 'Active',
+            b: 'b-open'
+        }, {
+            t: 'transport',
+            i: '🚕',
+            n: 'Ola / Uber Zones',
+            d: 'App cabs & auto-rickshaws across NM.',
+            a: 'All major stations & malls',
+            p: '080-6735-5566',
+            s: 'Active',
+            b: 'b-24'
+        }, {
+            t: 'transport',
+            i: '⛵',
+            n: 'Nhava-Sheva Ferry',
+            d: 'Sea ferry: Navi Mumbai ↔ Mumbai.',
+            a: 'Belapur Jetty',
+            p: '022-2756-0000',
+            s: 'Active',
+            b: 'b-open'
+        }];
+        const police = [{
+            n: 'Vashi PS',
+            a: 'Sector 17, Vashi',
+            p: '022-2765-8200'
+        }, {
+            n: 'Nerul PS',
+            a: 'Sector 21, Nerul',
+            p: '022-2771-8201'
+        }, {
+            n: 'Belapur PS',
+            a: 'Sector 8, CBD Belapur',
+            p: '022-2757-8200'
+        }, {
+            n: 'Panvel PS',
+            a: 'Old Panvel, NH-48',
+            p: '022-2746-8200'
+        }, {
+            n: 'Kharghar PS',
+            a: 'Sector 12, Kharghar',
+            p: '022-2774-8200'
+        }, {
+            n: 'Airoli PS',
+            a: 'Sector 19, Airoli',
+            p: '022-2769-8200'
+        }, {
+            n: 'Ghansoli PS',
+            a: 'Sector 4, Ghansoli',
+            p: '022-2763-8200'
+        }, {
+            n: 'Turbhe PS',
+            a: 'MIDC, Turbhe',
+            p: '022-2768-8200'
+        }, {
+            n: 'Kamothe PS',
+            a: 'Sector 3, Kamothe',
+            p: '022-2740-9200'
+        }, {
+            n: 'Sanpada PS',
+            a: 'Sector 5, Sanpada',
+            p: '022-2756-8500'
+        }];
+
+        function render(f = 'all') {
+            const g = document.getElementById('sgrid');
+            g.innerHTML = '';
+            const list = f === 'all' ? svcs : svcs.filter(s => s.t === f);
+            list.forEach(s => {
+                const c = document.createElement('div');
+                c.className = 'scard';
+                c.innerHTML = `<div class="shdr"><span class="sicon">${s.i}</span><div><div class="sname">${s.n}</div><div class="stype">${s.t.toUpperCase()}</div></div></div><span class="badge ${s.b}">${s.s}</span><div class="sdesc">${s.d}<br><small>📍 ${s.a}</small></div><div class="sact"><button class="btn-go" onclick="openMap('${s.n.replace(/'/g,"\\'")} Navi Mumbai')">📍 Map</button><button class="btn-info" onclick="window.open('tel:${s.p}')">📞 Call</button></div>`;
+                g.appendChild(c);
+            });
+        }
+
+        function renderPolice() {
+            const g = document.getElementById('pgrid');
+            police.forEach(p => {
+                const c = document.createElement('div');
+                c.className = 'pcard';
+                c.innerHTML = `<div class="pname">👮 ${p.n}</div><div class="paddr">📍 ${p.a}</div><div class="pnum">📞 ${p.p}</div><button class="pcall" onclick="window.open('tel:${p.p}')">Call Now</button>`;
+                g.appendChild(c);
+            });
+        }
+
+        function filter(t, btn) {
+            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            render(t)
+        }
+
+        function openMap(q) {
+            window.open(`https://www.google.com/maps/search/${encodeURIComponent(q)}`, '_blank')
+        }
+
+        function trackPhone() {
+            const ph = document.getElementById('tph').value.trim();
+            const res = document.getElementById('tres');
+            if (!ph) return alert('Enter a phone number');
+            res.style.display = 'block';
+            res.textContent = '🔍 Connecting to network...';
+            setTimeout(() => {
+                res.innerHTML = `<strong>📱 Device Located</strong><br>📞 <strong style="color:var(--accent)">${ph}</strong><br>📍 Area: <strong>Navi Mumbai, Maharashtra</strong><br>📡 Network: Reliance Jio / Airtel<br>🕐 Last seen: ${new Date().toLocaleTimeString()}<br><small style="color:var(--muted)">Accuracy: ~2km. Exact location needs law enforcement.</small>`;
+            }, 2000);
+        }
+        render();
+        renderPolice();
+    </script>
+</body>
+
+</html>
