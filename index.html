@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeTrail — Smart Tourist Safety System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --navy: #0a0f1e;
+            --deep: #0d1528;
+            --card: #111827;
+            --accent: #00c9ff;
+            --gold: #f5a623;
+            --danger: #ff4757;
+            --safe: #2ed573;
+            --text: #e8edf5;
+            --muted: #7a8aa0;
+            --border: rgba(0, 201, 255, 0.15);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+        
+        html {
+            scroll-behavior: smooth
+        }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--navy);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden
+        }
+        /* BG */
+        
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image: linear-gradient(rgba(0, 201, 255, 0.03)1px, transparent 1px), linear-gradient(90deg, rgba(0, 201, 255, 0.03)1px, transparent 1px);
+            background-size: 44px 44px
+        }
+        
+        .glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: .1;
+            pointer-events: none;
+            z-index: 0
+        }
+        
+        .glow-1 {
+            width: 700px;
+            height: 700px;
+            background: #00c9ff;
+            top: -200px;
+            right: -150px
+        }
+        
+        .glow-2 {
+            width: 500px;
+            height: 500px;
+            background: #f5a623;
+            bottom: -150px;
+            left: -100px
+        }
+        /* NAV */
+        
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 48px;
+            height: 68px;
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border)
+        }
+        
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.35rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            letter-spacing: -0.3px
+        }
+        
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #00c9ff, #0077ff);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 4px
+        }
+        
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.87rem;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all .2s;
+            border: 1px solid transparent;
+            font-weight: 500
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+            border-color: var(--border);
+            background: rgba(255, 255, 255, .04)
+        }
+        
+        .nav-sos {
+            background: var(--danger)!important;
+            color: #fff!important;
+            border-color: transparent!important;
+            font-weight: 700!important;
+            animation: sos-pulse 2s infinite
+        }
+        
+        @keyframes sos-pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 71, 87, .5)
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(255, 71, 87, 0)
+            }
+        }
+        /* HERO */
+        
+        .hero {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 100px 24px 60px
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 201, 255, .08);
+            border: 1px solid rgba(0, 201, 255, .25);
+            color: var(--accent);
+            font-size: .75rem;
+            font-weight: 600;
+            padding: 6px 18px;
+            border-radius: 100px;
+            margin-bottom: 28px;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            animation: fadeUp .7s ease both
+        }
+        
+        .hero h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(3rem, 7vw, 6rem);
+            font-weight: 800;
+            line-height: 1.03;
+            margin-bottom: 22px;
+            animation: fadeUp .7s .1s ease both
+        }
+        
+        .hero h1 em {
+            font-style: normal;
+            color: var(--accent)
+        }
+        
+        .hero p {
+            max-width: 580px;
+            color: var(--muted);
+            font-size: 1.1rem;
+            line-height: 1.75;
+            margin-bottom: 44px;
+            animation: fadeUp .7s .2s ease both
+        }
+        
+        .cta-row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeUp .7s .3s ease both
+        }
+        
+        .btn-p {
+            background: var(--accent);
+            color: var(--navy);
+            padding: 14px 34px;
+            border-radius: 9px;
+            font-weight: 700;
+            font-size: .95rem;
+            text-decoration: none;
+            font-family: 'Syne', sans-serif;
+            transition: all .2s;
+            border: none;
+            cursor: pointer
+        }
+        
+        .btn-p:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(0, 201, 255, .45)
+        }
+        
+        .btn-g {
+            background: transparent;
+            color: var(--text);
+            padding: 14px 34px;
+            border-radius: 9px;
+            font-weight: 500;
+            font-size: .95rem;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            transition: all .2s;
+            cursor: pointer
+        }
+        
+        .btn-g:hover {
+            background: rgba(255, 255, 255, .04);
+            border-color: var(--accent)
+        }
+        /* ALERT BANNER */
+        
+        .alert-demo {
+            position: relative;
+            z-index: 1;
+            margin: 0 48px 0;
+            background: linear-gradient(135deg, rgba(255, 71, 87, .12), rgba(255, 71, 87, .06));
+            border: 1px solid rgba(255, 71, 87, .35);
+            border-radius: 14px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            animation: fadeUp .7s .4s ease both
+        }
+        
+        .alert-demo .pulse-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--danger);
+            border-radius: 50%;
+            flex-shrink: 0;
+            animation: blink 1s infinite
+        }
+        
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1
+            }
+            50% {
+                opacity: .2
+            }
+        }
+        
+        .alert-demo-text {
+            flex: 1;
+            font-size: .85rem;
+            color: var(--text)
+        }
+        
+        .alert-demo-text strong {
+            color: var(--danger)
+        }
+        /* STATS */
+        
+        .stats {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            padding: 60px 48px 0;
+            animation: fadeUp .7s .5s ease both
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px 36px;
+            text-align: center
+        }
+        
+        .stat-n {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--accent)
+        }
+        
+        .stat-l {
+            font-size: .78rem;
+            color: var(--muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: .5px
+        }
+        /* FEATURES */
+        
+        .section {
+            position: relative;
+            z-index: 1;
+            padding: 80px 48px
+        }
+        
+        .sec-hd {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 8px
+        }
+        
+        .sec-sub {
+            color: var(--muted);
+            margin-bottom: 44px;
+            font-size: 1rem
+        }
+        
+        .feat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px
+        }
+        
+        .feat-card {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 28px;
+            transition: all .3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block
+        }
+        
+        .feat-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 16px 48px rgba(0, 201, 255, .1)
+        }
+        
+        .feat-icon {
+            font-size: 2.2rem;
+            margin-bottom: 18px;
+            display: block
+        }
+        
+        .feat-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 8px
+        }
+        
+        .feat-desc {
+            color: var(--muted);
+            font-size: .87rem;
+            line-height: 1.65
+        }
+        
+        .feat-tag {
+            display: inline-block;
+            margin-top: 16px;
+            font-size: .7rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 5px;
+            text-transform: uppercase;
+            letter-spacing: .5px
+        }
+        
+        .t-live {
+            background: rgba(46, 213, 115, .12);
+            color: var(--safe)
+        }
+        
+        .t-ai {
+            background: rgba(0, 201, 255, .12);
+            color: var(--accent)
+        }
+        
+        .t-sos {
+            background: rgba(255, 71, 87, .12);
+            color: var(--danger)
+        }
+        
+        .t-sec {
+            background: rgba(245, 166, 35, .12);
+            color: var(--gold)
+        }
+        /* HOW IT WORKS */
+        
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0;
+            position: relative
+        }
+        
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 28px;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            z-index: 0
+        }
+        
+        .step {
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            z-index: 1
+        }
+        
+        .step-num {
+            width: 56px;
+            height: 56px;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin: 0 auto 16px
+        }
+        
+        .step-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: .95rem;
+            margin-bottom: 8px
+        }
+        
+        .step-desc {
+            font-size: .82rem;
+            color: var(--muted);
+            line-height: 1.6
+        }
+        /* MODAL */
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .85);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(6px)
+        }
+        
+        .overlay.on {
+            display: flex
+        }
+        
+        .modal {
+            background: var(--deep);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 42px;
+            width: 440px;
+            max-width: 92vw;
+            position: relative;
+            animation: slideUp .3s ease
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(24px);
+                opacity: 0
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1
+            }
+        }
+        
+        .modal h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 800;
+            margin-bottom: 6px
+        }
+        
+        .modal-sub {
+            color: var(--muted);
+            font-size: .9rem;
+            margin-bottom: 28px
+        }
+        
+        .fg {
+            margin-bottom: 14px
+        }
+        
+        .fg label {
+            display: block;
+            font-size: .8rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+            font-weight: 500
+        }
+        
+        .fg input,
+        .fg select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            color: var(--text);
+            font-size: .93rem;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            transition: .2s
+        }
+        
+        .fg input:focus,
+        .fg select:focus {
+            border-color: var(--accent)
+        }
+        
+        .fg select option {
+            background: var(--deep)
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 18px;
+            right: 22px;
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1
+        }
+        
+        .modal-close:hover {
+            color: var(--text)
+        }
+        /* FOOTER */
+        
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 28px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: .82rem
+        }
+        /* SOS FLOAT */
+        
+        .sos-float {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 300;
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            background: var(--danger);
+            border: none;
+            cursor: pointer;
+            color: #fff;
+            font-family: 'Syne', sans-serif;
+            font-size: .78rem;
+            font-weight: 800;
+            box-shadow: 0 4px 28px rgba(255, 71, 87, .6);
+            animation: sos-pulse 1.5s infinite;
+            transition: transform .2s
+        }
+        
+        .sos-float:hover {
+            transform: scale(1.12)
+        }
+        
+        @keyframes fadeUp {
+            from {
+                transform: translateY(22px);
+                opacity: 0
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-grid"></div>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <nav>
+        <a href="index.html" class="logo">
+            <div class="logo-icon">🛡️</div>
+            SafeTrail
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="active">Home</a>
+            <a href="map.html">Live Map</a>
+            <a href="hotels.html">Hotels</a>
+            <a href="services.html">Services</a>
+            <a href="sos.html" class="nav-sos">🆘 SOS</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="badge">🌐 Navi Mumbai · AI Safety · Geo-Fencing</div>
+        <h1>Travel Safe,<br><em>Explore Free</em></h1>
+        <p>Real-time GPS tracking, AI distress detection, automatic emergency alerts, geo-fencing, and instant SOS — protecting tourists 24/7.</p>
+        <div class="cta-row">
+            <a href="map.html" class="btn-p">Open Live Map →</a>
+            <a href="#" class="btn-g" onclick="openModal()">Register Now</a>
+        </div>
+    </section>
+
+    <div class="alert-demo" style="position:relative;z-index:1;max-width:700px;margin:-20px auto 0;margin-bottom:60px">
+        <div class="pulse-dot"></div>
+        <div class="alert-demo-text">
+            <strong>🤖 AI Distress Detected</strong> — User "Priya S." has been stationary for 8 mins in a low-visibility area. <strong>Auto-alert sent</strong> to emergency contacts + Police notified.
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-n">26+</div>
+            <div class="stat-l">Cities Covered</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-n">500+</div>
+            <div class="stat-l">Hotels Listed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-n">&lt;30s</div>
+            <div class="stat-l">SOS Response</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-n">24/7</div>
+            <div class="stat-l">AI Monitoring</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-n">3</div>
+            <div class="stat-l">Auto Alert Channels</div>
+        </div>
+    </div>
+
+    <section class="section">
+        <div class="sec-hd">Everything You Need to Stay Safe</div>
+        <div class="sec-sub">Click any feature to explore it</div>
+        <div class="feat-grid">
+            <a href="map.html" class="feat-card">
+                <span class="feat-icon">📍</span>
+                <div class="feat-title">Live GPS Tracking</div>
+                <div class="feat-desc">Real-time location with dark-themed map, geo-fence zones, and automatic alerts on entering danger areas.</div>
+                <span class="feat-tag t-live">Live</span>
+            </a>
+            <a href="sos.html" class="feat-card">
+                <span class="feat-icon">🤖</span>
+                <div class="feat-title">AI Distress Detection</div>
+                <div class="feat-desc">Detects unusual stillness, panic shaking, or erratic movement. Automatically calls emergency contact & police.</div>
+                <span class="feat-tag t-ai">AI Powered</span>
+            </a>
+            <a href="sos.html" class="feat-card">
+                <span class="feat-icon">🆘</span>
+                <div class="feat-title">Auto SOS + Call + Email</div>
+                <div class="feat-desc">One tap or auto-trigger sends SMS, email with GPS link, and initiates call to registered emergency contact.</div>
+                <span class="feat-tag t-sos">Emergency</span>
+            </a>
+            <a href="hotels.html" class="feat-card">
+                <span class="feat-icon">🏨</span>
+                <div class="feat-title">Hotel Directory</div>
+                <div class="feat-desc">All hotels in 26 Navi Mumbai cities with price, food, contact, and Google Maps integration.</div>
+                <span class="feat-tag t-sec">26 Cities</span>
+            </a>
+            <a href="services.html" class="feat-card">
+                <span class="feat-icon">🏥</span>
+                <div class="feat-title">Nearby Services</div>
+                <div class="feat-desc">Hospitals, police, pharmacies, banks, restaurants — all filtered by your live location.</div>
+                <span class="feat-tag t-live">Real-Time</span>
+            </a>
+            <a href="sos.html" class="feat-card">
+                <span class="feat-icon">👮</span>
+                <div class="feat-title">Police Auto-Alert</div>
+                <div class="feat-desc">When SOS triggers, Navi Mumbai Police is automatically notified with your name, location, and photo.</div>
+                <span class="feat-tag t-sos">Auto</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+        <div class="sec-hd">How It Works</div>
+        <div class="sec-sub">4 steps from registration to safety</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">01</div>
+                <div class="step-title">Register</div>
+                <div class="step-desc">Create profile with emergency contacts, medical info & blockchain ID</div>
+            </div>
+            <div class="step">
+                <div class="step-num">02</div>
+                <div class="step-num" style="display:none"></div>
+                <div class="step-title">Track</div>
+                <div class="step-desc">Live GPS tracks your location. AI monitors movement patterns</div>
+            </div>
+            <div class="step">
+                <div class="step-num">03</div>
+                <div class="step-title">Detect</div>
+                <div class="step-desc">AI detects distress signals — no movement, panic, or geo-fence breach</div>
+            </div>
+            <div class="step">
+                <div class="step-num">04</div>
+                <div class="step-title">Alert</div>
+                <div class="step-desc">Auto call + email + SMS to family & police with live location link</div>
+            </div>
+        </div>
+    </section>
+
+    <footer>© 2025 SafeTrail — Navi Mumbai Smart Tourist Safety System &nbsp;|&nbsp; AI · GPS · Blockchain · Geo-Fencing</footer>
+
+    <!-- REGISTER / LOGIN MODAL -->
+    <div class="overlay" id="regModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border)">
+                <button id="tabRegBtn" onclick="switchTab('reg')" style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid var(--accent);color:var(--accent);font-weight:700;cursor:pointer;font-size:.95rem">Register</button>
+                <button id="tabLoginBtn" onclick="switchTab('login')" style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-weight:600;cursor:pointer;font-size:.95rem">Login</button>
+            </div>
+            <!-- REGISTER PANEL -->
+            <div id="panelReg">
+            <p class="modal-sub">Create your SafeTrail safety profile</p>
+            <div class="fg"><label>Full Name *</label><input type="text" id="rName" placeholder="Priya Sharma"></div>
+            <div class="fg"><label>Phone Number *</label><input type="tel" id="rPhone" placeholder="+91 98765 43210"></div>
+            <div class="fg"><label>Emergency Contact (Parent/Guardian) *</label><input type="tel" id="rEmg" placeholder="+91 98765 43210"></div>
+            <div class="fg"><label>Emergency Email *</label><input type="email" id="rEmail" placeholder="parent@gmail.com"></div>
+            <div class="fg"><label>Medical Info</label><input type="text" id="rMed" placeholder="Blood group, allergies..."></div>
+            <div class="fg">
+                <label>Current City</label>
+                <select id="rCity">
+        <option value="">Select city</option>
+        <option>Vashi</option><option>Nerul</option><option>Belapur</option><option>Kharghar</option>
+        <option>Panvel</option><option>Airoli</option><option>Ghansoli</option><option>Turbhe</option>
+        <option>Sanpada</option><option>Seawoods</option><option>Kamothe</option><option>Kalamboli</option>
+        <option>New Panvel</option><option>Ulwe</option><option>Taloja</option>
+      </select>
+            </div>
+            <div style="margin-top:20px;display:flex;gap:10px">
+                <button class="btn-p" style="flex:1" onclick="registerUser()">Register & Stay Safe →</button>
+            </div>
+            <div id="regMsg" style="margin-top:12px;font-size:.82rem;text-align:center"></div>
+            </div><!-- end panelReg -->
+            <!-- LOGIN PANEL -->
+            <div id="panelLogin" style="display:none">
+            <p class="modal-sub">Login with your registered phone number</p>
+            <div class="fg"><label>Phone Number *</label><input type="tel" id="lPhone" placeholder="+91 98765 43210"></div>
+            <div style="margin-top:20px;display:flex;gap:10px">
+                <button class="btn-p" style="flex:1" onclick="loginUser()">Login →</button>
+            </div>
+            <div id="loginMsg" style="margin-top:12px;font-size:.82rem;text-align:center"></div>
+            </div><!-- end panelLogin -->
+        </div>
+    </div>
+
+    <button class="sos-float" onclick="location.href='sos.html'">SOS</button>
+
+    <script>
+        // ── FIX #1: Phone validation (frontend) ──────────────────
+        function validatePhone(raw) {
+            // Strip +91 / 91 / leading 0, spaces, dashes
+            let cleaned = raw.replace(/^\+91|^91|^0/, '').replace(/[\s\-\(\)]/g, '')
+            if (!/^\d+$/.test(cleaned)) return { ok: false, msg: 'Phone must contain digits only' }
+            if (cleaned.length !== 10) return { ok: false, msg: `Phone must be exactly 10 digits (got ${cleaned.length})` }
+            return { ok: true, val: cleaned }
+        }
+
+        // ── FIX #2: Geolocation helper ───────────────────────────
+        let cachedLat = null, cachedLng = null
+        function getLocation() {
+            return new Promise((resolve) => {
+                if (!navigator.geolocation) { resolve(null); return }
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        cachedLat = pos.coords.latitude
+                        cachedLng = pos.coords.longitude
+                        resolve({ lat: cachedLat, lng: cachedLng })
+                    },
+                    () => resolve(null),   // user denied or error — resolve null gracefully
+                    { enableHighAccuracy: true, timeout: 8000 }
+                )
+            })
+        }
+
+        // ── Modal helpers ─────────────────────────────────────────
+        const BASE_URL = 'http://127.0.0.1:5500';
+
+        function openModal() {
+            document.getElementById('regModal').classList.add('on')
+            switchTab('reg')
+        }
+        function closeModal() {
+            document.getElementById('regModal').classList.remove('on')
+        }
+        function switchTab(tab) {
+            const isReg = tab === 'reg';
+            document.getElementById('panelReg').style.display = isReg ? '' : 'none';
+            document.getElementById('panelLogin').style.display = isReg ? 'none' : '';
+            document.getElementById('tabRegBtn').style.borderBottomColor = isReg ? 'var(--accent)' : 'transparent';
+            document.getElementById('tabRegBtn').style.color = isReg ? 'var(--accent)' : 'var(--muted)';
+            document.getElementById('tabLoginBtn').style.borderBottomColor = isReg ? 'transparent' : 'var(--accent)';
+            document.getElementById('tabLoginBtn').style.color = isReg ? 'var(--muted)' : 'var(--accent)';
+        }
+        async function loginUser() {
+            const msg = document.getElementById('loginMsg');
+            const rawPhone = document.getElementById('lPhone').value.trim();
+            const phoneCheck = validatePhone(rawPhone);
+            if (!phoneCheck.ok) {
+                msg.innerHTML = `<span style="color:var(--danger)">❌ ${phoneCheck.msg}</span>`;
+                return;
+            }
+            msg.innerHTML = '<span style="color:var(--muted)">⏳ Logging in...</span>';
+            try {
+                const res = await fetch(`${BASE_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phoneCheck.val })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    msg.innerHTML = `<span style="color:var(--danger)">❌ ${data.error || 'Login failed'}</span>`;
+                    return;
+                }
+                const profile = data.user;
+                localStorage.setItem('safetrail_user', JSON.stringify(profile));
+                msg.innerHTML = `<span style="color:var(--safe)">✅ Welcome back, ${profile.name}! Redirecting...</span>`;
+                setTimeout(() => location.href = 'map.html', 1400);
+            } catch (err) {
+                // Offline: try localStorage
+                const stored = localStorage.getItem('safetrail_user');
+                if (stored) {
+                    const p = JSON.parse(stored);
+                    if (p.phone === phoneCheck.val || p.phone === phoneCheck.val) {
+                        msg.innerHTML = `<span style="color:var(--gold)">⚠️ Offline mode — using saved profile. Redirecting...</span>`;
+                        setTimeout(() => location.href = 'map.html', 1400);
+                        return;
+                    }
+                }
+                msg.innerHTML = '<span style="color:var(--danger)">❌ Server offline and no local profile found. Please register first.</span>';
+            }
+        }
+        document.getElementById('regModal').addEventListener('click', e => {
+            if (e.target === document.getElementById('regModal')) closeModal()
+        })
+
+        // ── FIX #1 + #2 + #3: registerUser sends to backend ──────
+        async function registerUser() {
+            const msg = document.getElementById('regMsg')
+            const name  = document.getElementById('rName').value.trim()
+            const emg   = document.getElementById('rEmg').value.trim()
+            const email = document.getElementById('rEmail').value.trim()
+            const rawPhone = document.getElementById('rPhone').value.trim()
+
+            // Validate required fields
+            if (!name) { msg.innerHTML = '<span style="color:var(--danger)">❌ Full name is required</span>'; return }
+            if (!rawPhone) { msg.innerHTML = '<span style="color:var(--danger)">❌ Phone number is required</span>'; return }
+            if (!emg) { msg.innerHTML = '<span style="color:var(--danger)">❌ Emergency contact is required</span>'; return }
+
+            // FIX #1: strict phone validation
+            const phoneCheck = validatePhone(rawPhone)
+            if (!phoneCheck.ok) {
+                msg.innerHTML = `<span style="color:var(--danger)">❌ ${phoneCheck.msg}</span>`
+                return
+            }
+            const phone = phoneCheck.val   // clean 10-digit number
+
+            // FIX #2: get live location before registering
+            msg.innerHTML = '<span style="color:var(--muted)">📍 Getting location...</span>'
+            const loc = await getLocation()
+
+            msg.innerHTML = '<span style="color:var(--muted)">⏳ Registering...</span>'
+
+            // FIX #3: send to Flask backend (actually stores in DB)
+            try {
+                const payload = {
+                    name,
+                    phone,
+                    emergency_contact: emg,
+                    emergency_email: email,
+                    medical: document.getElementById('rMed').value.trim(),
+                    city: document.getElementById('rCity').value,
+                    latitude: loc ? loc.lat : null,
+                    longitude: loc ? loc.lng : null
+                }
+                const res = await fetch(`${BASE_URL}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                const data = await res.json()
+                if (!res.ok) {
+                    msg.innerHTML = `<span style="color:var(--danger)">❌ ${data.error || 'Registration failed'}</span>`
+                    return
+                }
+                // Save to localStorage for map page use
+                const profile = { ...payload, user_id: data.user_id, blockchain_id: data.blockchain_id }
+                localStorage.setItem('safetrail_user', JSON.stringify(profile))
+                msg.innerHTML = `<span style="color:var(--safe)">✅ Registered! Sending welcome notifications...</span>`
+
+                // Trigger welcome SMS via backend
+                try {
+                    const welcomeRes = await fetch(`${BASE_URL}/api/send-welcome`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(profile)
+                    });
+                    const wData = await welcomeRes.json();
+
+                    // Trigger SMS to emergency contact via device
+                    if (wData.sms_body && wData.sms_to) {
+                        const smsLink = `sms:${wData.sms_to}?body=${encodeURIComponent(wData.sms_body)}`;
+                        window.open(smsLink);
+                    }
+
+                    // Show full success state
+                    const emailNote = wData.email_sent ? '📧 Welcome email sent!' : '';
+                    const smsNote = wData.sms_to ? '💬 SMS sent to emergency contact!' : '';
+                    msg.innerHTML = `<span style="color:var(--safe)">✅ Registered! ${emailNote} ${smsNote}<br>Redirecting to Live Map...</span>`
+                } catch(e) {
+                    msg.innerHTML = `<span style="color:var(--safe)">✅ Registered! Welcome ${name}. Redirecting...</span>`
+                }
+
+                setTimeout(() => location.href = 'map.html', 2200)
+            } catch (err) {
+                // Backend not reachable — still save locally so app works offline
+                console.warn('Backend unreachable, saving locally:', err)
+                const profile = { name, phone, emergency_contact: emg, emergency_email: email,
+                                  medical: document.getElementById('rMed').value,
+                                  city: document.getElementById('rCity').value,
+                                  latitude: loc ? loc.lat : null, longitude: loc ? loc.lng : null }
+                localStorage.setItem('safetrail_user', JSON.stringify(profile))
+                msg.innerHTML = '<span style="color:var(--gold)">⚠️ Saved locally (server offline). Redirecting...</span>'
+                setTimeout(() => location.href = 'map.html', 1400)
+            }
+        }
+    </script>
+</body>
+
+</html>
